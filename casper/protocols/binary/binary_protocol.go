@@ -2,6 +2,7 @@ package binary
 
 import (
 	"cbc-casper-go/casper"
+	. "cbc-casper-go/casper/simulation"
 	"encoding/json"
 	"errors"
 )
@@ -11,26 +12,14 @@ type BinaryProtocol struct {
 	casper.Protocol
 }
 
-type BinaryJson struct {
-	protocol string
-	config   *struct {
-		validators      []uint64
-		initialEstimate []int
-	}
-	execution *struct {
-		executionString string
-		msgPerRound     uint64
-	}
-}
-
 func NewBinaryProtocol(jsonStr string, display uint64, save interface{}, reportInterval uint64) (*BinaryProtocol, error) {
 	parsedJson, err := parseJson(jsonStr)
 	if parsedJson == nil || err != nil {
 		return nil, err
 	}
-	protocol := casper.NewProtocol(parsedJson.config.validators,
-		parsedJson.execution.executionString,
-		parsedJson.execution.msgPerRound*reportInterval,
+	protocol := casper.NewProtocol(parsedJson.Conf.Validators,
+		parsedJson.Exec.ExeStr,
+		parsedJson.Exec.MsgPerRound*reportInterval,
 		display,
 		save)
 	binaryProtocol := &BinaryProtocol{*protocol}
@@ -38,17 +27,17 @@ func NewBinaryProtocol(jsonStr string, display uint64, save interface{}, reportI
 	return binaryProtocol, nil
 }
 
-func parseJson(jsonStr string) (*BinaryJson, error) {
-	var parsedJson BinaryJson
+func parseJson(jsonStr string) (*JsonBase, error) {
+	var parsedJson JsonBase
 	err := json.Unmarshal([]byte(jsonStr), &parsedJson)
 	if err != nil {
 		return nil, err
 	}
-	if len(parsedJson.config.initialEstimate) != len(parsedJson.config.validators) {
+	if len(parsedJson.Conf.Estimates.([]interface{})) != len(parsedJson.Conf.Validators) {
 		return nil, errors.New("len(validators) != len(estimates)")
 	}
-	for _, estimate := range parsedJson.config.initialEstimate {
-		if !isValidEstimate(estimate) {
+	for _, estimate := range parsedJson.Conf.Estimates.([]interface{}) {
+		if !isValidEstimate(int(estimate.(float64))) {
 			return nil, errors.New("estimate invalid")
 		}
 	}

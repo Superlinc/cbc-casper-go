@@ -15,9 +15,9 @@ type Protocol struct {
 	executed            string
 	messagePerRound     uint64
 	messageThisRound    uint64
-	messages            map[string]*Message
-	messageFromHash     map[uint64]*Message
-	messageNameFromHash map[uint64]string
+	Messages            map[string]*Message
+	MessageFromHash     map[uint64]*Message
+	MessageNameFromHash map[uint64]string
 	handlers            map[string]func(*Protocol, *Validator, string)
 }
 
@@ -29,9 +29,9 @@ func NewProtocol(weights []uint64, execution string, messagePerRound uint64, dis
 		executed:            "",
 		messagePerRound:     messagePerRound,
 		messageThisRound:    0,
-		messages:            make(map[string]*Message),
-		messageFromHash:     make(map[uint64]*Message),
-		messageNameFromHash: make(map[uint64]string),
+		Messages:            make(map[string]*Message),
+		MessageFromHash:     make(map[uint64]*Message),
+		MessageNameFromHash: make(map[uint64]string),
 		handlers:            make(map[string]func(*Protocol, *Validator, string)),
 	}
 	protocol.RegisterHandler("M", (*Protocol).MakeMessage)
@@ -48,15 +48,15 @@ func (p *Protocol) RegisterHandler(token string, function func(*Protocol, *Valid
 }
 
 func (p *Protocol) RegisterMessage(message *Message, name string) {
-	if _, ok := p.messages[name]; ok {
+	if _, ok := p.Messages[name]; ok {
 		_ = fmt.Errorf("message with %s already exists", name)
 	}
-	if _, ok := p.messageFromHash[message.Hash()]; ok {
+	if _, ok := p.MessageFromHash[message.Hash()]; ok {
 		_ = fmt.Errorf("message with %d already exists", message.Hash())
 	}
-	p.messages[name] = message
-	p.messageFromHash[message.Hash()] = message
-	p.messageNameFromHash[message.Hash()] = name
+	p.Messages[name] = message
+	p.MessageFromHash[message.Hash()] = message
+	p.MessageNameFromHash[message.Hash()] = name
 	p.GlobalView.AddMessages([]*Message{message})
 }
 
@@ -68,18 +68,18 @@ func (p *Protocol) MakeMessage(validator *Validator, messageName string) {
 
 // SendMessage 给该验证器传递一个消息
 func (p *Protocol) SendMessage(validator *Validator, messageName string) {
-	message := p.messages[messageName]
+	message := p.Messages[messageName]
 	validator.ReceiveMessages([]*Message{message})
 }
 
 // SendAndJustify 传递消息以及其依赖
 func (p *Protocol) SendAndJustify(validator *Validator, messageName string) {
-	message := p.messages[messageName]
+	message := p.Messages[messageName]
 	messageToSend := p.MessagesNeededToJustify(message, validator)
 	//for _, msg := range messageToSend {
-	//	fmt.Println(p.messageNameFromHash[msg.Hash()])
+	//	fmt.Println(p.MessageNameFromHash[msg.Hash()])
 	//	for _, hash := range msg.Justification {
-	//		fmt.Println(p.messageNameFromHash[hash])
+	//		fmt.Println(p.MessageNameFromHash[hash])
 	//	}
 	//}
 	validator.ReceiveMessages(messageToSend)
@@ -93,7 +93,7 @@ func (p *Protocol) MessagesNeededToJustify(message *Message, validator *Validato
 		nextHashes := hashset.New()
 		for _, m := range messageHashes.Values() {
 			messageHash := m.(uint64)
-			message = p.messageFromHash[messageHash]
+			message = p.MessageFromHash[messageHash]
 			messageNeeded.Add(message)
 			for _, hash := range message.Justification {
 				if _, ok := validator.View.justifiedMessages[hash]; !ok {
