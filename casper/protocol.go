@@ -96,7 +96,7 @@ func (p *Protocol) MessagesNeededToJustify(message *Message, validator *Validato
 			message = p.MessageFromHash[messageHash]
 			messageNeeded.Add(message)
 			for _, hash := range message.Justification {
-				if _, ok := validator.View.justifiedMessages[hash]; !ok {
+				if _, ok := validator.View.JustifiedMessages[hash]; !ok {
 					nextHashes.Add(hash)
 				}
 			}

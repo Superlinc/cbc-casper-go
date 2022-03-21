@@ -2,11 +2,11 @@ package casper
 
 // View 存储已经收到的消息
 type View struct {
-	justifiedMessages      map[uint64]*Message     // message hash => message
-	pendingMessages        map[uint64]*Message     // message hash => message
-	numMissingDependencies map[uint64]int          // message hash => number of message hashes
-	dependenciesOfMessage  map[uint64][]uint64     // message hash => list(message hashes)
-	latestMessages         map[*Validator]*Message // validator => message
+	JustifiedMessages      map[uint64]*Message     // message hash => message
+	PendingMessages        map[uint64]*Message     // message hash => message
+	NumMissingDependencies map[uint64]int          // message hash => number of message hashes
+	DependenciesOfMessage  map[uint64][]uint64     // message hash => list(message hashes)
+	LatestMessages         map[*Validator]*Message // validator => message
 }
 
 func NewView(messages []*Message) *View {
@@ -14,11 +14,11 @@ func NewView(messages []*Message) *View {
 		messages = make([]*Message, 0, 4)
 	}
 	v := &View{
-		justifiedMessages:      make(map[uint64]*Message),
-		pendingMessages:        make(map[uint64]*Message),
-		numMissingDependencies: make(map[uint64]int),
-		dependenciesOfMessage:  make(map[uint64][]uint64),
-		latestMessages:         make(map[*Validator]*Message),
+		JustifiedMessages:      make(map[uint64]*Message),
+		PendingMessages:        make(map[uint64]*Message),
+		NumMissingDependencies: make(map[uint64]int),
+		DependenciesOfMessage:  make(map[uint64][]uint64),
+		LatestMessages:         make(map[*Validator]*Message),
 	}
 	v.AddMessages(messages)
 	return v
@@ -37,10 +37,10 @@ func (v *View) updateSafeEstimate(set ValidatorSet) {
 // AddMessages 添加新的message到pending或者justify
 func (v *View) AddMessages(messages []*Message) {
 	for _, message := range messages {
-		if _, ok := v.pendingMessages[message.Hash()]; ok {
+		if _, ok := v.PendingMessages[message.Hash()]; ok {
 			continue
 		}
-		if _, ok := v.justifiedMessages[message.Hash()]; ok {
+		if _, ok := v.JustifiedMessages[message.Hash()]; ok {
 			continue
 		}
 		missingMessageHashes := v.MissingMessageInJustification(message)
@@ -65,14 +65,14 @@ func (v *View) ReceiveJustifiedMessage(m *Message) {
 // ReceivePendingMessage 更新待验证消息
 func (v *View) ReceivePendingMessage(m *Message, hashes []uint64) {
 	h := m.Hash()
-	v.pendingMessages[h] = m
-	v.numMissingDependencies[h] = len(hashes)
+	v.PendingMessages[h] = m
+	v.NumMissingDependencies[h] = len(hashes)
 
 	for _, hash := range hashes {
-		if _, ok := v.dependenciesOfMessage[hash]; !ok {
-			v.dependenciesOfMessage[hash] = make([]uint64, 0, 4)
+		if _, ok := v.DependenciesOfMessage[hash]; !ok {
+			v.DependenciesOfMessage[hash] = make([]uint64, 0, 4)
 		}
-		v.dependenciesOfMessage[hash] = append(v.dependenciesOfMessage[hash], h)
+		v.DependenciesOfMessage[hash] = append(v.DependenciesOfMessage[hash], h)
 	}
 
 }
@@ -81,10 +81,10 @@ func (v *View) ReceivePendingMessage(m *Message, hashes []uint64) {
 func (v *View) GetNewlyJustifiedMessage(m *Message) []*Message {
 	newlyJustifiedMessages := make([]*Message, 0, 4)
 	newlyJustifiedMessages = append(newlyJustifiedMessages, m)
-	for _, dependentHash := range v.dependenciesOfMessage[m.Hash()] {
-		v.numMissingDependencies[dependentHash] -= 1
-		if v.numMissingDependencies[dependentHash] == 0 {
-			newMessage := v.pendingMessages[dependentHash]
+	for _, dependentHash := range v.DependenciesOfMessage[m.Hash()] {
+		v.NumMissingDependencies[dependentHash] -= 1
+		if v.NumMissingDependencies[dependentHash] == 0 {
+			newMessage := v.PendingMessages[dependentHash]
 			newlyJustifiedMessages = append(newlyJustifiedMessages, v.GetNewlyJustifiedMessage(newMessage)...)
 		}
 	}
@@ -97,25 +97,25 @@ func (v *View) UpdateProtocolSpecificView(m *Message) {
 
 // AddToLatestMessage 更新validator的最新消息
 func (v *View) AddToLatestMessage(m *Message) {
-	if _, ok := v.latestMessages[m.Sender]; !ok {
-		v.latestMessages[m.Sender] = m
-	} else if v.latestMessages[m.Sender].SeqNum < m.SeqNum {
-		v.latestMessages[m.Sender] = m
+	if _, ok := v.LatestMessages[m.Sender]; !ok {
+		v.LatestMessages[m.Sender] = m
+	} else if v.LatestMessages[m.Sender].SeqNum < m.SeqNum {
+		v.LatestMessages[m.Sender] = m
 	}
 }
 
 // AddJustifiedRemovePending 添加已验证的消息并删除相关数据
 func (v *View) AddJustifiedRemovePending(m *Message) {
 	h := m.Hash()
-	v.justifiedMessages[h] = m
-	if _, ok := v.numMissingDependencies[h]; ok {
-		delete(v.numMissingDependencies, h)
+	v.JustifiedMessages[h] = m
+	if _, ok := v.NumMissingDependencies[h]; ok {
+		delete(v.NumMissingDependencies, h)
 	}
-	if _, ok := v.dependenciesOfMessage[h]; ok {
-		delete(v.dependenciesOfMessage, h)
+	if _, ok := v.DependenciesOfMessage[h]; ok {
+		delete(v.DependenciesOfMessage, h)
 	}
-	if _, ok := v.pendingMessages[h]; ok {
-		delete(v.pendingMessages, h)
+	if _, ok := v.PendingMessages[h]; ok {
+		delete(v.PendingMessages, h)
 	}
 }
 
@@ -127,7 +127,7 @@ func (v *View) MissingMessageInJustification(m *Message) []uint64 {
 	}
 	result := make([]uint64, 0, 4)
 	for value := range values {
-		if _, ok := v.justifiedMessages[value]; !ok {
+		if _, ok := v.JustifiedMessages[value]; !ok {
 			result = append(result, value)
 		}
 	}

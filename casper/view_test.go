@@ -44,7 +44,7 @@ func TestView_ReceiveJustifiedMessage(t *testing.T) {
 		t.Errorf("error")
 	}
 	p.Execute("SJ-1-B")
-	//for hash := range v1.View.pendingMessages {
+	//for hash := range v1.View.PendingMessages {
 	//	fmt.Println(p.MessageNameFromHash[hash])
 	//}
 	j = v1.Justification()
@@ -62,8 +62,8 @@ func TestView_AddJustifiedMessage(t *testing.T) {
 	p.Execute("M-0-A M-0-B SJ-1-A")
 	v0 := p.GlobalValidatorSet.GetValByName(0)
 	v1 := p.GlobalValidatorSet.GetValByName(1)
-	j0 := v0.View.justifiedMessages
-	j1 := v1.View.justifiedMessages
+	j0 := v0.View.JustifiedMessages
+	j1 := v1.View.JustifiedMessages
 	set0 := hashset.New()
 	set1 := hashset.New()
 	for _, v := range j0 {
@@ -93,17 +93,17 @@ func TestView_MultipleMessage(t *testing.T) {
 	p.Execute("M-0-A SJ-1-A M-0-B M-0-C M-0-D M-0-E M-0-F S-1-F")
 	v1 := p.GlobalValidatorSet.GetValByName(1)
 	pendingSet := hashset.New()
-	for _, v := range v1.View.pendingMessages {
+	for _, v := range v1.View.PendingMessages {
 		pendingSet.Add(v)
 	}
 	if !pendingSet.Contains(p.Messages["F"]) {
 		t.Errorf("error")
 	}
-	for _, v := range p.GlobalView.justifiedMessages {
+	for _, v := range p.GlobalView.JustifiedMessages {
 		v1.ReceiveMessages([]*Message{v})
 	}
 	justifySet := hashset.New()
-	for _, v := range v1.View.justifiedMessages {
+	for _, v := range v1.View.JustifiedMessages {
 		justifySet.Add(v)
 	}
 	if !justifySet.Contains(p.Messages["F"]) {

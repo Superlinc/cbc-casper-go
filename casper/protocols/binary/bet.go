@@ -18,10 +18,13 @@ func (b *Bet) conflictWith(message *Bet) (bool, error) {
 	return b.Estimate != message.Estimate, nil
 }
 
-func isValidEstimate(estimate int) bool {
-	if estimate == 0 || estimate == 1 {
-		return true
-	} else {
+func isValidEstimate(estimate interface{}) bool {
+	value, ok := estimate.(int)
+	if !ok {
 		return false
+	} else if value != 0 && value != 1 {
+		return false
+	} else {
+		return true
 	}
 }

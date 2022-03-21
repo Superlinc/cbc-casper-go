@@ -33,7 +33,7 @@ func (v *Validator) Estimate() interface{} {
 }
 
 func (v *Validator) MyLatestMessage() *Message {
-	return v.View.latestMessages[v]
+	return v.View.LatestMessages[v]
 }
 
 // MakeNewMessage 为该验证器生成一条最新消息
@@ -53,8 +53,8 @@ func (v *Validator) MakeNewMessage() *Message {
 // Justification 返回最新消息的哈希值
 func (v *Validator) Justification() map[*Validator]uint64 {
 	latestMessageHashes := make(map[*Validator]uint64)
-	for validator := range v.View.latestMessages {
-		latestMessageHashes[validator] = v.View.latestMessages[validator].Hash()
+	for validator := range v.View.LatestMessages {
+		latestMessageHashes[validator] = v.View.LatestMessages[validator].Hash()
 	}
 	return latestMessageHashes
 }
@@ -72,11 +72,11 @@ func (v *Validator) NextSeqNum() uint64 {
 
 // NextDisPlayHeight 返回下一个区块号
 func (v *Validator) NextDisPlayHeight() uint64 {
-	if len(v.View.latestMessages) == 0 {
+	if len(v.View.LatestMessages) == 0 {
 		return 0
 	}
 	var max uint64
-	for _, m := range v.View.latestMessages {
+	for _, m := range v.View.LatestMessages {
 		max = MaxUint(m.DisplayHeight, max)
 	}
 	return max + 1
