@@ -1,27 +1,19 @@
 package main
 
-import (
-	"fmt"
-	"math/rand"
-	"time"
-)
+import "fmt"
 
 func main() {
 
-	for i := 0; i < 10; i++ {
-		a := rand.Int()
-		fmt.Printf("%d/", a)
-	}
-	fmt.Println()
-	for i := 0; i < 5; i++ {
-		r := rand.Intn(8)
-		fmt.Printf("%d/", r)
-	}
-	fmt.Println()
-	timens := int64(time.Now().Nanosecond())
-	rand.Seed(timens)
-	for i := 0; i < 10; i++ {
-		fmt.Printf("%2.2f / ", 100*rand.Float32())
-	}
+	arr := make([]int, 2, 2)
+	test(arr)
+	fmt.Println(arr)
 
+}
+
+func test(arr []int) {
+	arr = make([]int, 4, 4)
+	arr[0] = 0
+	arr[1] = 1
+	arr[2] = 2
+	arr[3] = 3
 }

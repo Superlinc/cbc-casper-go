@@ -10,7 +10,7 @@ type Bet struct {
 	*casper.Message
 }
 
-func (b *Bet) conflictWith(message *Bet) (bool, error) {
+func (b *Bet) ConflictWith(message *casper.Message) (bool, error) {
 	if !isValidEstimate(message.Estimate) {
 		_ = fmt.Errorf("estimate should be integer")
 		return true, errors.New("message estimate error")

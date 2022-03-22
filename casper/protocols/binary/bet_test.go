@@ -35,7 +35,7 @@ func TestBet(t *testing.T) {
 			Header:        0,
 		},
 	}
-	ok, err := b0.conflictWith(b1)
+	ok, err := b0.ConflictWith(b1.Message)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
@@ -43,7 +43,7 @@ func TestBet(t *testing.T) {
 		t.Errorf("error")
 	}
 	b1.Estimate = 0
-	ok, err = b0.conflictWith(b1)
+	ok, err = b0.ConflictWith(b1.Message)
 	if err != nil {
 		t.Errorf(err.Error())
 	}

@@ -30,10 +30,6 @@ func (v *View) Estimate() interface{} {
 	return 0
 }
 
-func (v *View) updateSafeEstimate(set ValidatorSet) {
-	panic("need to be implemented")
-}
-
 // AddMessages 添加新的message到pending或者justify
 func (v *View) AddMessages(messages []*Message) {
 	for _, message := range messages {

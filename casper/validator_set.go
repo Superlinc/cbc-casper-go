@@ -24,6 +24,12 @@ func NewValidatorSet(weights []uint64) *ValidatorSet {
 
 func (valSet *ValidatorSet) Weight(validators []*Validator) uint64 {
 	var sum uint64
+	if validators == nil {
+		validators = make([]*Validator, 0, valSet.Size())
+		for _, v := range valSet.validators.Values() {
+			validators = append(validators, v.(*Validator))
+		}
+	}
 	for _, val := range validators {
 		if valSet.validators.Contains(val) {
 			sum += val.Weight
