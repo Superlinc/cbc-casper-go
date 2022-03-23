@@ -4,6 +4,7 @@ import (
 	. "cbc-casper-go/casper"
 	"cbc-casper-go/casper/protocols/integer"
 	"errors"
+	"github.com/emirpasic/gods/sets/hashset"
 )
 
 // CliqueOracle todo
@@ -36,8 +37,8 @@ func NewCliqueOracle(msg *Message, view *View, valSet *ValidatorSet) (*CliqueOra
 	return c, nil
 }
 
-func (o *CliqueOracle) collectEdge() [][2]*Validator {
-	edges := make([][2]*Validator, 0, 4)
+func (o *CliqueOracle) collectEdge() [][]interface{} {
+	edges := make([][]interface{}, 0, 4)
 	for i := 0; i < len(o.candidates); i++ {
 		for j := i + 1; j < len(o.candidates); j++ {
 			v1 := o.candidates[i]
@@ -70,7 +71,7 @@ func (o *CliqueOracle) collectEdge() [][2]*Validator {
 			if ExistFreeMsg(b, v1, msg1InV2.SeqNum, o.View) {
 				continue
 			}
-			edges = append(edges, [2]*Validator{v1, v2})
+			edges = append(edges, []interface{}{v1, v2})
 		}
 	}
 	return edges
@@ -80,10 +81,44 @@ func (o *CliqueOracle) collectEdge() [][2]*Validator {
 // 1. 他们的最新消息都满足候选消息
 // 2. 他们互相看过最新消息
 // 3. 他们当中没有不满足候选消息的最新消息
-func (o *CliqueOracle) findBiggestClique() {
+func (o *CliqueOracle) findBiggestClique() ([]*Validator, uint64) {
 	if o.ValSet.Weight(o.candidates) < o.ValSet.Weight(nil)/2 {
-		return
+		return nil, 0
 	}
-	// edges := o.collectEdge()
+	edges := o.collectEdge()
+	g := NewGraph(edges...)
+	cliques := g.FindMaximalClique()
+	var maxWeight uint64
+	var maxClique []*Validator
+	for _, clique := range cliques {
+		weight := GetWeight(clique...)
+		if weight > maxWeight {
+			maxWeight = weight
+			maxClique = InterfaceToValidator(clique...)
+		}
+	}
+	return maxClique, maxWeight
+}
 
+// CheckEstimateSafety todo
+func (o *CliqueOracle) CheckEstimateSafety() (uint64, int) {
+	biggestClique, cliqueWeight := o.findBiggestClique()
+	faultTolerance := 2*cliqueWeight - o.ValSet.Weight(nil)
+
+	if faultTolerance <= 0 {
+		return 0, 0
+	}
+
+	equivocating := hashset.New()
+	weights := hashset.New()
+	diff := hashset.New()
+	for _, validator := range biggestClique {
+		weights.Add(validator.Weight)
+		diff.Add(validator.Weight)
+	}
+	for Sum(equivocating) < faultTolerance {
+		equivocating.Add(Max(diff))
+		diff.Remove(Max(diff))
+	}
+	return faultTolerance, equivocating.Size() - 1
 }

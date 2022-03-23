@@ -1,7 +1,6 @@
 package safety_oracles
 
 import (
-	"fmt"
 	"github.com/emirpasic/gods/sets/hashset"
 	"reflect"
 	"sort"
@@ -14,7 +13,7 @@ type Graph struct {
 	cliques [][]int
 }
 
-func NewGraph(edges [][]interface{}) *Graph {
+func NewGraph(edges ...[]interface{}) *Graph {
 	v := make([]interface{}, 0, 4)
 	m := make(map[interface{}]int)
 	length := 0
@@ -40,9 +39,6 @@ func NewGraph(edges [][]interface{}) *Graph {
 		e[m[edge[0]]][m[edge[1]]] = 1
 		e[m[edge[1]]][m[edge[0]]] = 1
 	}
-	for _, ints := range e {
-		fmt.Println(ints)
-	}
 	return &Graph{
 		v: v,
 		m: m,
@@ -60,7 +56,6 @@ func (g *Graph) FindMaximalClique() [][]interface{} {
 	max := new(int)
 	g.cliques = make([][]int, 0, 4)
 	g.dfs(R, P, X, max)
-	fmt.Println(*max)
 	ans := make([][]interface{}, 0, len(g.cliques))
 	for _, clique := range g.cliques {
 		item := make([]interface{}, 0, len(clique))

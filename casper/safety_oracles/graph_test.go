@@ -13,7 +13,7 @@ func TestGraph_FindMaximalClique(t *testing.T) {
 	edges = append(edges, []interface{}{2, 5})
 	edges = append(edges, []interface{}{3, 5})
 	edges = append(edges, []interface{}{4, 5})
-	g := NewGraph(edges)
+	g := NewGraph(edges...)
 	cliques := g.FindMaximalClique()
 	if len(cliques) != 3 {
 		t.Errorf("error")

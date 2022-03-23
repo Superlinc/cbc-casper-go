@@ -1,4 +1,4 @@
-package binary
+package integer
 
 import (
 	"cbc-casper-go/casper"
@@ -7,12 +7,11 @@ import (
 	"errors"
 )
 
-// BinaryProtocol 对一比特数据达成共识的协议
-type BinaryProtocol struct {
+type IntegerProtocol struct {
 	*casper.Protocol
 }
 
-func NewBinaryProtocol(jsonStr string, display uint64, save interface{}, reportInterval uint64) (*BinaryProtocol, error) {
+func NewIntegerProtocol(jsonStr string, display uint64, save interface{}, reportInterval uint64) (*IntegerProtocol, error) {
 	parsedJson, err := parseJson(jsonStr)
 	if parsedJson == nil || err != nil {
 		return nil, err
@@ -22,9 +21,10 @@ func NewBinaryProtocol(jsonStr string, display uint64, save interface{}, reportI
 		parsedJson.Exec.MsgPerRound*reportInterval,
 		display,
 		save)
-	binaryProtocol := &BinaryProtocol{protocol}
-
-	return binaryProtocol, nil
+	integerProtocol := &IntegerProtocol{
+		protocol,
+	}
+	return integerProtocol, nil
 }
 
 func parseJson(jsonStr string) (*JsonBase, error) {
@@ -44,7 +44,7 @@ func parseJson(jsonStr string) (*JsonBase, error) {
 	return &parsedJson, nil
 }
 
-func (p *BinaryProtocol) SetInitMsg(estimates []int) {
+func (p IntegerProtocol) SetInitMsg(estimates []int) {
 	for _, validator := range p.GlobalValidatorSet.Validators() {
 		msg := &Bet{
 			&casper.Message{

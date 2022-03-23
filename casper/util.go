@@ -1,6 +1,7 @@
 package casper
 
 import (
+	"github.com/emirpasic/gods/sets/hashset"
 	"math/rand"
 	"time"
 )
@@ -37,4 +38,20 @@ func UInt64Sum(nums []uint64) uint64 {
 		sum += num
 	}
 	return sum
+}
+
+func Sum(set *hashset.Set) uint64 {
+	var sum uint64
+	for _, v := range set.Values() {
+		sum += v.(uint64)
+	}
+	return sum
+}
+
+func Max(set *hashset.Set) uint64 {
+	var max uint64
+	for _, v := range set.Values() {
+		max = MaxUint(max, v.(uint64))
+	}
+	return max
 }

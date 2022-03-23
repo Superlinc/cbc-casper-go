@@ -19,3 +19,19 @@ func ExistFreeMsg(bet protocols.Bet, val *Validator, seqNum uint64, view *View) 
 	}
 	return false
 }
+
+func GetWeight(validators ...interface{}) uint64 {
+	var weight uint64
+	for _, validator := range validators {
+		weight += validator.(*Validator).Weight
+	}
+	return weight
+}
+
+func InterfaceToValidator(values ...interface{}) []*Validator {
+	validators := make([]*Validator, 0, len(values))
+	for _, value := range values {
+		validators = append(validators, value.(*Validator))
+	}
+	return validators
+}
