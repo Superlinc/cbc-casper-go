@@ -22,7 +22,7 @@ func getEstimate(latestMessage map[*casper.Validator]*casper.Message) int {
 	var prefixWeight uint64
 	for _, bet := range msgs {
 		prefixWeight += bet.Sender.Weight
-		if float64(prefixWeight) > half {
+		if float64(prefixWeight) >= half {
 			return bet.Estimate.(int)
 		}
 	}

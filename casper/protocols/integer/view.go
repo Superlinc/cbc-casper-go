@@ -17,7 +17,8 @@ func (v *IntegerView) Estimate() int {
 
 func (v *IntegerView) UpdateSafeEstimate(valSet *casper.ValidatorSet) {
 	for _, message := range v.LatestMessages {
-		oracle, err := safety_oracles.NewCliqueOracle(message, v.View, valSet)
+		bet := &Bet{message}
+		oracle, err := safety_oracles.NewCliqueOracle(bet, v.View, valSet)
 		if err != nil {
 			continue
 		}

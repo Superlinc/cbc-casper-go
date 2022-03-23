@@ -20,9 +20,9 @@ type Execution struct {
 	ExeStr      string `json:"exe_str"`
 }
 
-func makeBaseObj(protocol, exeStr string, weights []uint64, estimates []int) *JsonBase {
+func makeBaseObj(protocol, exeStr string, weights []uint64, estimates []interface{}) *JsonBase {
 	return &JsonBase{
-		Protocol: "binary",
+		Protocol: protocol,
 		Conf: Config{
 			Validators: weights,
 			Estimates:  estimates,
@@ -34,8 +34,18 @@ func makeBaseObj(protocol, exeStr string, weights []uint64, estimates []int) *Js
 	}
 }
 
-func GenerateBinaryJsonString(weights []uint64, exeStr string, estimates []int) string {
+func GenerateBinaryJsonString(weights []uint64, exeStr string, estimates []interface{}) string {
 	data := makeBaseObj("binary", exeStr, weights, estimates)
+	var str string
+	if bs, err := json.Marshal(data); err == nil {
+		str = string(bs)
+		// fmt.Println("generate successfully")
+	}
+	return str
+}
+
+func GenerateIntegerJsonString(weights []uint64, exeStr string, estimates []interface{}) string {
+	data := makeBaseObj("integer", exeStr, weights, estimates)
 	var str string
 	if bs, err := json.Marshal(data); err == nil {
 		str = string(bs)

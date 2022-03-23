@@ -2,34 +2,33 @@ package safety_oracles
 
 import (
 	. "cbc-casper-go/casper"
-	"cbc-casper-go/casper/protocols/integer"
+	"cbc-casper-go/casper/protocols"
 	"errors"
 	"github.com/emirpasic/gods/sets/hashset"
 )
 
 // CliqueOracle todo
 type CliqueOracle struct {
-	candidateEstimate *Message
+	candidateEstimate protocols.Bet
 	View              *View
 	ValSet            *ValidatorSet
 	candidates        []*Validator
 }
 
-func NewCliqueOracle(msg *Message, view *View, valSet *ValidatorSet) (*CliqueOracle, error) {
-	if msg == nil {
+func NewCliqueOracle(bet protocols.Bet, view *View, valSet *ValidatorSet) (*CliqueOracle, error) {
+	if bet == nil {
 		return nil, errors.New("cannot decide if safe without an estimate")
 	}
 	candidates := make([]*Validator, 0, 4)
 	for _, v := range valSet.Validators() {
 		if _, ok := view.LatestMessages[v]; ok {
-			b := &integer.Bet{Message: msg}
-			if ok, _ := b.ConflictWith(view.LatestMessages[v]); !ok {
+			if ok, _ := bet.ConflictWith(view.LatestMessages[v]); !ok {
 				candidates = append(candidates, v)
 			}
 		}
 	}
 	c := &CliqueOracle{
-		candidateEstimate: msg,
+		candidateEstimate: bet,
 		View:              view,
 		ValSet:            valSet,
 		candidates:        candidates,
@@ -43,7 +42,6 @@ func (o *CliqueOracle) collectEdge() [][]interface{} {
 		for j := i + 1; j < len(o.candidates); j++ {
 			v1 := o.candidates[i]
 			v2 := o.candidates[j]
-			b := &integer.Bet{Message: o.candidateEstimate}
 			msg1 := o.View.LatestMessages[v1]
 			if _, ok := msg1.Justification[v2]; !ok {
 				continue
@@ -51,7 +49,7 @@ func (o *CliqueOracle) collectEdge() [][]interface{} {
 			hash := msg1.Justification[v2]
 			msg2InV1 := o.View.JustifiedMessages[hash]
 
-			if ok, _ := b.ConflictWith(msg2InV1); ok {
+			if ok, _ := o.candidateEstimate.ConflictWith(msg2InV1); ok {
 				continue
 			}
 
@@ -61,14 +59,14 @@ func (o *CliqueOracle) collectEdge() [][]interface{} {
 			}
 			hash = msg2.Justification[v1]
 			msg1InV2 := o.View.JustifiedMessages[hash]
-			if ok, _ := b.ConflictWith(msg1InV2); ok {
+			if ok, _ := o.candidateEstimate.ConflictWith(msg1InV2); ok {
 				continue
 			}
 
-			if ExistFreeMsg(b, v2, msg2InV1.SeqNum, o.View) {
+			if ExistFreeMsg(o.candidateEstimate, v2, msg2InV1.SeqNum, o.View) {
 				continue
 			}
-			if ExistFreeMsg(b, v1, msg1InV2.SeqNum, o.View) {
+			if ExistFreeMsg(o.candidateEstimate, v1, msg1InV2.SeqNum, o.View) {
 				continue
 			}
 			edges = append(edges, []interface{}{v1, v2})
