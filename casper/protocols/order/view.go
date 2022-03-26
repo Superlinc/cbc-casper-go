@@ -1,8 +1,9 @@
-package integer
+package order
 
 import (
 	"cbc-casper-go/casper"
 	"cbc-casper-go/casper/safety_oracles"
+	"container/list"
 	"fmt"
 )
 
@@ -11,7 +12,7 @@ type View struct {
 	lastFinalEstimate *casper.Message
 }
 
-func (v *View) Estimate() int {
+func (v *View) Estimate() *list.List {
 	return getEstimate(v.LatestMessages)
 }
 

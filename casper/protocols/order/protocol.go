@@ -1,4 +1,4 @@
-package binary
+package order
 
 import (
 	"cbc-casper-go/casper"
@@ -7,12 +7,11 @@ import (
 	"errors"
 )
 
-// Protocol 对一比特数据达成共识的协议
 type Protocol struct {
 	*casper.Protocol
 }
 
-func NewBinaryProtocol(jsonStr string, display uint64, save interface{}, reportInterval uint64) (*Protocol, error) {
+func NewOrderProtocol(jsonStr string, display uint64, save interface{}, reportInterval uint64) (*Protocol, error) {
 	parsedJson, err := parseJson(jsonStr)
 	if parsedJson == nil || err != nil {
 		return nil, err
@@ -22,9 +21,10 @@ func NewBinaryProtocol(jsonStr string, display uint64, save interface{}, reportI
 		parsedJson.Exec.MsgPerRound*reportInterval,
 		display,
 		save)
-	binaryProtocol := &Protocol{protocol}
-
-	return binaryProtocol, nil
+	orderProtocol := &Protocol{
+		protocol,
+	}
+	return orderProtocol, nil
 }
 
 func parseJson(jsonStr string) (*JsonBase, error) {

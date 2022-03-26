@@ -7,11 +7,11 @@ import (
 	"errors"
 )
 
-type IntegerProtocol struct {
+type Protocol struct {
 	*casper.Protocol
 }
 
-func NewIntegerProtocol(jsonStr string, display uint64, save interface{}, reportInterval uint64) (*IntegerProtocol, error) {
+func NewIntegerProtocol(jsonStr string, display uint64, save interface{}, reportInterval uint64) (*Protocol, error) {
 	parsedJson, err := parseJson(jsonStr)
 	if parsedJson == nil || err != nil {
 		return nil, err
@@ -21,7 +21,7 @@ func NewIntegerProtocol(jsonStr string, display uint64, save interface{}, report
 		parsedJson.Exec.MsgPerRound*reportInterval,
 		display,
 		save)
-	integerProtocol := &IntegerProtocol{
+	integerProtocol := &Protocol{
 		protocol,
 	}
 	return integerProtocol, nil
@@ -44,7 +44,7 @@ func parseJson(jsonStr string) (*JsonBase, error) {
 	return &parsedJson, nil
 }
 
-func (p IntegerProtocol) SetInitMsg(estimates []int) {
+func (p *Protocol) SetInitMsg(estimates []int) {
 	for _, validator := range p.GlobalValidatorSet.Validators() {
 		msg := &Bet{
 			&casper.Message{
