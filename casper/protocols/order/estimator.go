@@ -27,7 +27,7 @@ func getEstimate(latestMessage map[*casper.Validator]*casper.Message) *list.List
 
 	l := list.New()
 	for _, elem := range arr {
-		l.PushBack(elem)
+		l.PushFront(elem)
 	}
 
 	return l

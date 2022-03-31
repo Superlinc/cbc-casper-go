@@ -3,6 +3,7 @@ package order
 import (
 	"cbc-casper-go/casper"
 	. "cbc-casper-go/casper/simulation"
+	"container/list"
 	"encoding/json"
 	"errors"
 )
@@ -36,11 +37,18 @@ func parseJson(jsonStr string) (*JsonBase, error) {
 	if len(parsedJson.Conf.Estimates.([]interface{})) != len(parsedJson.Conf.Validators) {
 		return nil, errors.New("len(validators) != len(estimates)")
 	}
-	for _, estimate := range parsedJson.Conf.Estimates.([]interface{}) {
-		if !isValidEstimate(int(estimate.(float64))) {
+	estimates := make([]*list.List, 0, len(parsedJson.Conf.Estimates.([]interface{})))
+	for _, e := range parsedJson.Conf.Estimates.([]interface{}) {
+		estimate := list.New()
+		for _, v := range e.([]interface{}) {
+			estimate.PushBack(v)
+		}
+		if !isValidEstimate(estimate) {
 			return nil, errors.New("estimate invalid")
 		}
+		estimates = append(estimates, estimate)
 	}
+	parsedJson.Conf.Estimates = estimates
 	return &parsedJson, nil
 }
 
