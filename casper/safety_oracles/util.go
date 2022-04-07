@@ -5,17 +5,17 @@ import (
 	"cbc-casper-go/casper/protocols"
 )
 
-func ExistFreeMsg(bet protocols.Bet, val *Validator, seqNum uint64, view *View) bool {
-	curMsg := view.LatestMessages[val]
-	for curMsg.SeqNum > seqNum {
+func ExistFreeMsg(bet protocols.Bet, val AbstractValidator, seqNum uint64, view *View) bool {
+	curMsg := view.LatestMsg()[val]
+	for curMsg.SeqNum() > seqNum {
 		if ok, _ := bet.ConflictWith(curMsg); ok {
 			return true
 		}
-		if curMsg.SeqNum == 0 {
+		if curMsg.SeqNum() == 0 {
 			break
 		}
-		nextHash := curMsg.Justification[val]
-		curMsg = view.JustifiedMessages[nextHash]
+		nextHash := curMsg.Justification()[val]
+		curMsg = view.JustifiedMsg()[nextHash]
 	}
 	return false
 }
@@ -23,7 +23,7 @@ func ExistFreeMsg(bet protocols.Bet, val *Validator, seqNum uint64, view *View) 
 func GetWeight(validators ...interface{}) uint64 {
 	var weight uint64
 	for _, validator := range validators {
-		weight += validator.(*Validator).Weight
+		weight += validator.(*Validator).Weight()
 	}
 	return weight
 }

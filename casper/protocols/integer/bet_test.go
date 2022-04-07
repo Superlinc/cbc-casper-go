@@ -15,22 +15,8 @@ func TestIsValidEstimate(t *testing.T) {
 }
 
 func TestBet_ConflictWith(t *testing.T) {
-	message1 := &casper.Message{
-		Sender:        nil,
-		Estimate:      0,
-		Justification: nil,
-		SeqNum:        0,
-		DisplayHeight: 0,
-		Header:        0,
-	}
-	message2 := &casper.Message{
-		Sender:        nil,
-		Estimate:      0,
-		Justification: nil,
-		SeqNum:        0,
-		DisplayHeight: 0,
-		Header:        0,
-	}
+	message1 := casper.NewMessage(0, nil, nil, 0, 0)
+	message2 := casper.NewMessage(0, nil, nil, 0, 0)
 	bet1 := &Bet{message1}
 	bet2 := &Bet{message2}
 	if ok, _ := bet1.ConflictWith(bet2.Message); ok {

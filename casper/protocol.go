@@ -9,30 +9,30 @@ import (
 )
 
 type Protocol struct {
-	GlobalValidatorSet  *ValidatorSet
-	GlobalView          *View
-	unexecuted          string
-	executed            string
-	messagePerRound     uint64
-	messageThisRound    uint64
-	Messages            map[string]*Message
-	MessageFromHash     map[uint64]*Message
-	MessageNameFromHash map[uint64]string
-	handlers            map[string]func(*Protocol, *Validator, string)
+	ValSet           ValidatorSetor
+	view             Viewer
+	unexecuted       string
+	executed         string
+	messagePerRound  uint64
+	messageThisRound uint64
+	Msgs             map[string]Messager
+	msgsFromHash     map[uint64]Messager
+	namesFromHash    map[uint64]string
+	handlers         map[string]func(*Protocol, AbstractValidator, string)
 }
 
-func NewProtocol(weights []uint64, execution string, messagePerRound uint64, display, save interface{}) *Protocol {
+func NewProtocol(weights []uint64, execution string, messagePerRound uint64) *Protocol {
 	protocol := &Protocol{
-		GlobalValidatorSet:  NewValidatorSet(weights),
-		GlobalView:          NewView(nil),
-		unexecuted:          execution,
-		executed:            "",
-		messagePerRound:     messagePerRound,
-		messageThisRound:    0,
-		Messages:            make(map[string]*Message),
-		MessageFromHash:     make(map[uint64]*Message),
-		MessageNameFromHash: make(map[uint64]string),
-		handlers:            make(map[string]func(*Protocol, *Validator, string)),
+		ValSet:           NewValidatorSet(weights),
+		view:             NewView(nil),
+		unexecuted:       execution,
+		executed:         "",
+		messagePerRound:  messagePerRound,
+		messageThisRound: 0,
+		Msgs:             make(map[string]Messager),
+		msgsFromHash:     make(map[uint64]Messager),
+		namesFromHash:    make(map[uint64]string),
+		handlers:         make(map[string]func(*Protocol, AbstractValidator, string)),
 	}
 	protocol.RegisterHandler("M", (*Protocol).MakeMessage)
 	protocol.RegisterHandler("S", (*Protocol).SendMessage)
@@ -40,72 +40,72 @@ func NewProtocol(weights []uint64, execution string, messagePerRound uint64, dis
 	return protocol
 }
 
-func (p *Protocol) RegisterHandler(token string, function func(*Protocol, *Validator, string)) {
+func (p *Protocol) RegisterHandler(token string, function func(*Protocol, AbstractValidator, string)) {
 	if _, ok := p.handlers[token]; ok {
 		_ = fmt.Errorf("a function has been registered with this token")
 	}
 	p.handlers[token] = function
 }
 
-func (p *Protocol) RegisterMessage(message *Message, name string) {
-	if _, ok := p.Messages[name]; ok {
+func (p *Protocol) RegisterMessage(message Messager, name string) {
+	if _, ok := p.Msgs[name]; ok {
 		_ = fmt.Errorf("message with %s already exists", name)
 	}
-	if _, ok := p.MessageFromHash[message.Hash()]; ok {
+	if _, ok := p.msgsFromHash[message.Hash()]; ok {
 		_ = fmt.Errorf("message with %d already exists", message.Hash())
 	}
-	p.Messages[name] = message
-	p.MessageFromHash[message.Hash()] = message
-	p.MessageNameFromHash[message.Hash()] = name
-	p.GlobalView.AddMessages([]*Message{message})
+	p.Msgs[name] = message
+	p.msgsFromHash[message.Hash()] = message
+	p.namesFromHash[message.Hash()] = name
+	p.view.AddMessages([]Messager{message})
 }
 
 // MakeMessage 使用该验证器生成消息
-func (p *Protocol) MakeMessage(validator *Validator, messageName string) {
+func (p *Protocol) MakeMessage(validator AbstractValidator, messageName string) {
 	newMessage := validator.MakeNewMessage()
 	p.RegisterMessage(newMessage, messageName)
 }
 
 // SendMessage 给该验证器传递一个消息
-func (p *Protocol) SendMessage(validator *Validator, messageName string) {
-	message := p.Messages[messageName]
-	validator.ReceiveMessages([]*Message{message})
+func (p *Protocol) SendMessage(validator AbstractValidator, messageName string) {
+	message := p.Msgs[messageName]
+	validator.ReceiveMessages([]Messager{message})
 }
 
 // SendAndJustify 传递消息以及其依赖
-func (p *Protocol) SendAndJustify(validator *Validator, messageName string) {
-	message := p.Messages[messageName]
+func (p *Protocol) SendAndJustify(validator AbstractValidator, messageName string) {
+	message := p.Msgs[messageName]
 	messageToSend := p.MessagesNeededToJustify(message, validator)
 	//for _, msg := range messageToSend {
-	//	fmt.Println(p.MessageNameFromHash[msg.Hash()])
+	//	fmt.Println(p.namesFromHash[msg.Hash()])
 	//	for _, hash := range msg.Justification {
-	//		fmt.Println(p.MessageNameFromHash[hash])
+	//		fmt.Println(p.namesFromHash[hash])
 	//	}
 	//}
 	validator.ReceiveMessages(messageToSend)
 }
 
 // MessagesNeededToJustify 返回消息及未验证依赖
-func (p *Protocol) MessagesNeededToJustify(message *Message, validator *Validator) []*Message {
+func (p *Protocol) MessagesNeededToJustify(message Messager, validator AbstractValidator) []Messager {
 	messageNeeded := hashset.New(message)
 	messageHashes := hashset.New(message.Hash())
 	for messageHashes.Size() != 0 {
 		nextHashes := hashset.New()
 		for _, m := range messageHashes.Values() {
 			messageHash := m.(uint64)
-			message = p.MessageFromHash[messageHash]
+			message = p.msgsFromHash[messageHash]
 			messageNeeded.Add(message)
-			for _, hash := range message.Justification {
-				if _, ok := validator.View.JustifiedMessages[hash]; !ok {
+			for _, hash := range message.Justification() {
+				if _, ok := validator.View().JustifiedMsg()[hash]; !ok {
 					nextHashes.Add(hash)
 				}
 			}
 		}
 		messageHashes = nextHashes
 	}
-	result := make([]*Message, 0, messageNeeded.Size())
+	result := make([]Messager, 0, messageNeeded.Size())
 	for _, v := range messageNeeded.Values() {
-		result = append(result, v.(*Message))
+		result = append(result, v.(Messager))
 	}
 	return result
 }
@@ -116,7 +116,7 @@ func (p *Protocol) Execute(additionalStr string) {
 	}
 	for _, token := range strings.Split(p.unexecuted, " ") {
 		comm, vali, name, _ := parseToken(token)
-		validator := p.GlobalValidatorSet.GetValByName(vali)
+		validator := p.ValSet.GetValByName(vali)
 		p.handlers[comm](p, validator, name)
 		if comm == "M" {
 			p.messageThisRound += 1

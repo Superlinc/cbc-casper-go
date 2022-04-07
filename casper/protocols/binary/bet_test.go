@@ -16,24 +16,10 @@ func TestEstimate(t *testing.T) {
 
 func TestBet(t *testing.T) {
 	b0 := &Bet{
-		&casper.Message{
-			Sender:        nil,
-			Estimate:      0,
-			Justification: nil,
-			SeqNum:        0,
-			DisplayHeight: 0,
-			Header:        0,
-		},
+		casper.NewMessage(0, nil, nil, 0, 0),
 	}
 	b1 := &Bet{
-		&casper.Message{
-			Sender:        nil,
-			Estimate:      1,
-			Justification: nil,
-			SeqNum:        0,
-			DisplayHeight: 0,
-			Header:        0,
-		},
+		casper.NewMessage(1, nil, nil, 0, 0),
 	}
 	ok, err := b0.ConflictWith(b1.Message)
 	if err != nil {

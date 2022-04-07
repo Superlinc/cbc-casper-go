@@ -13,11 +13,12 @@ type View struct {
 }
 
 func (v *View) Estimate() *list.List {
-	return getEstimate(v.LatestMessages)
+	return getEstimate(v.LatestMsg())
 }
 
-func (v *View) UpdateSafeEstimate(valSet *casper.ValidatorSet) {
-	for _, message := range v.LatestMessages {
+func (v *View) UpdateSafeEstimates(valSet *casper.ValidatorSet) {
+	for _, m := range v.LatestMsg() {
+		message := m.(*casper.Message)
 		bet := &Bet{message}
 		oracle, err := safety_oracles.NewCliqueOracle(bet, v.View, valSet)
 		if err != nil {

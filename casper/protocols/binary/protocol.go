@@ -12,16 +12,14 @@ type Protocol struct {
 	*casper.Protocol
 }
 
-func NewBinaryProtocol(jsonStr string, display uint64, save interface{}, reportInterval uint64) (*Protocol, error) {
+func NewBinaryProtocol(jsonStr string, reportInterval uint64) (*Protocol, error) {
 	parsedJson, err := parseJson(jsonStr)
 	if parsedJson == nil || err != nil {
 		return nil, err
 	}
 	protocol := casper.NewProtocol(parsedJson.Conf.Validators,
 		parsedJson.Exec.ExeStr,
-		parsedJson.Exec.MsgPerRound*reportInterval,
-		display,
-		save)
+		parsedJson.Exec.MsgPerRound*reportInterval)
 	binaryProtocol := &Protocol{protocol}
 
 	return binaryProtocol, nil
@@ -45,17 +43,11 @@ func parseJson(jsonStr string) (*JsonBase, error) {
 }
 
 func (p *Protocol) SetInitMsg(estimates []int) {
-	for _, validator := range p.GlobalValidatorSet.Validators() {
+	for _, validator := range p.ValSet.Validators() {
 		msg := &Bet{
-			&casper.Message{
-				Estimate:      estimates[validator.Name],
-				Justification: make(map[*casper.Validator]uint64),
-				Sender:        validator,
-				SeqNum:        0,
-				DisplayHeight: 0,
-			},
+			casper.NewMessage(estimates[validator.Name()], make(map[casper.AbstractValidator]uint64), validator, 0, 0),
 		}
 		p.RegisterMessage(msg.Message, casper.GetRandomStr(10))
-		validator.InitializeView([]*casper.Message{msg.Message})
+		validator.InitializeView([]casper.Messager{msg.Message})
 	}
 }

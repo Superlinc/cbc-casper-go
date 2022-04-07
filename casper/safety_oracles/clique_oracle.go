@@ -12,18 +12,18 @@ type CliqueOracle struct {
 	candidateEstimate protocols.Bet
 	View              *View
 	ValSet            *ValidatorSet
-	candidates        []*Validator
+	candidates        []AbstractValidator
 }
 
 func NewCliqueOracle(bet protocols.Bet, view *View, valSet *ValidatorSet) (*CliqueOracle, error) {
 	if bet == nil {
 		return nil, errors.New("cannot decide if safe without an estimate")
 	}
-	candidates := make([]*Validator, 0, 4)
+	candidates := make([]AbstractValidator, 0, 4)
 	for _, v := range valSet.Validators() {
-		if _, ok := view.LatestMessages[v]; ok {
-			if ok, _ := bet.ConflictWith(view.LatestMessages[v]); !ok {
-				candidates = append(candidates, v)
+		if _, ok := view.LatestMsg()[v]; ok {
+			if ok, _ := bet.ConflictWith(view.LatestMsg()[v]); !ok {
+				candidates = append(candidates, v.(*Validator))
 			}
 		}
 	}
@@ -42,31 +42,31 @@ func (o *CliqueOracle) collectEdge() [][]interface{} {
 		for j := i + 1; j < len(o.candidates); j++ {
 			v1 := o.candidates[i]
 			v2 := o.candidates[j]
-			msg1 := o.View.LatestMessages[v1]
-			if _, ok := msg1.Justification[v2]; !ok {
+			msg1 := o.View.LatestMsg()[v1]
+			if _, ok := msg1.Justification()[v2]; !ok {
 				continue
 			}
-			hash := msg1.Justification[v2]
-			msg2InV1 := o.View.JustifiedMessages[hash]
+			hash := msg1.Justification()[v2]
+			msg2InV1 := o.View.JustifiedMsg()[hash]
 
 			if ok, _ := o.candidateEstimate.ConflictWith(msg2InV1); ok {
 				continue
 			}
 
-			msg2 := o.View.LatestMessages[v2]
-			if _, ok := msg2.Justification[v1]; !ok {
+			msg2 := o.View.LatestMsg()[v2]
+			if _, ok := msg2.Justification()[v1]; !ok {
 				continue
 			}
-			hash = msg2.Justification[v1]
-			msg1InV2 := o.View.JustifiedMessages[hash]
+			hash = msg2.Justification()[v1]
+			msg1InV2 := o.View.JustifiedMsg()[hash]
 			if ok, _ := o.candidateEstimate.ConflictWith(msg1InV2); ok {
 				continue
 			}
 
-			if ExistFreeMsg(o.candidateEstimate, v2, msg2InV1.SeqNum, o.View) {
+			if ExistFreeMsg(o.candidateEstimate, v2, msg2InV1.SeqNum(), o.View) {
 				continue
 			}
-			if ExistFreeMsg(o.candidateEstimate, v1, msg1InV2.SeqNum, o.View) {
+			if ExistFreeMsg(o.candidateEstimate, v1, msg1InV2.SeqNum(), o.View) {
 				continue
 			}
 			edges = append(edges, []interface{}{v1, v2})
@@ -111,8 +111,8 @@ func (o *CliqueOracle) CheckEstimateSafety() (uint64, int) {
 	weights := hashset.New()
 	diff := hashset.New()
 	for _, validator := range biggestClique {
-		weights.Add(validator.Weight)
-		diff.Add(validator.Weight)
+		weights.Add(validator.Weight())
+		diff.Add(validator.Weight())
 	}
 	for Sum(equivocating) < faultTolerance {
 		equivocating.Add(Max(diff))

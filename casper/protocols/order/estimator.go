@@ -6,13 +6,14 @@ import (
 	"sort"
 )
 
-func getEstimate(latestMessage map[*casper.Validator]*casper.Message) *list.List {
+func getEstimate(latestMessage map[casper.AbstractValidator]casper.Messager) *list.List {
 	weights := make(map[interface{}]uint64)
 
-	for validator, message := range latestMessage {
+	for validator, m := range latestMessage {
+		message := m.(*casper.Message)
 		estimate := message.Estimate.(*list.List)
 		for i, iter := 0, estimate.Front(); iter != nil; i, iter = i+1, iter.Next() {
-			weights[iter.Value] += validator.Weight * uint64(estimate.Len()-i)
+			weights[iter.Value] += validator.Weight() * uint64(estimate.Len()-i)
 		}
 	}
 

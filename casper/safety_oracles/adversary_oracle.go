@@ -25,8 +25,8 @@ func NewAdversaryOracle(estimate interface{}, view *casper.View, set *casper.Val
 func (o *AdversaryOracle) getMsgAndView() {
 	recentMsg := make(map[*casper.Validator]*casper.Message)
 	for _, v := range o.ValSet.Validators() {
-		if _, ok := o.View.LatestMessages[v]; !ok {
-			recentMsg[v] = nil
+		if _, ok := o.View.LatestMsg()[v]; !ok {
+			recentMsg[v.(*casper.Validator)] = nil
 		}
 	}
 }

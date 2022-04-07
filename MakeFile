@@ -1,0 +1,7 @@
+test:
+	go test ./casper -v
+	go test ./casper/protocols/binary -v
+	go test ./casper/protocols/blockchain -v
+	go test ./casper/protocols/integer -v
+	go test ./casper/protocols/order -v
+	go test ./casper/safety_oracles -v

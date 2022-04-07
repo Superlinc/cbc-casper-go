@@ -2,54 +2,64 @@ package casper
 
 // View 存储已经收到的消息
 type View struct {
-	JustifiedMessages      map[uint64]*Message     // message hash => message
-	PendingMessages        map[uint64]*Message     // message hash => message
-	NumMissingDependencies map[uint64]int          // message hash => number of message hashes
-	DependenciesOfMessage  map[uint64][]uint64     // message hash => list(message hashes)
-	LatestMessages         map[*Validator]*Message // validator => message
+	justifiedMsg  map[uint64]Messager            // message hash => message
+	pendingMsg    map[uint64]Messager            // message hash => message
+	numMissDepend map[uint64]int                 // message hash => number of message hashes
+	msgDepend     map[uint64][]uint64            // message hash => list(message hashes)
+	latestMsg     map[AbstractValidator]Messager // validator => message
 }
 
-func NewView(messages []*Message) *View {
-	if messages == nil {
-		messages = make([]*Message, 0, 4)
+func NewView(msg []Messager) Viewer {
+	if msg == nil {
+		msg = make([]Messager, 0, 4)
 	}
 	v := &View{
-		JustifiedMessages:      make(map[uint64]*Message),
-		PendingMessages:        make(map[uint64]*Message),
-		NumMissingDependencies: make(map[uint64]int),
-		DependenciesOfMessage:  make(map[uint64][]uint64),
-		LatestMessages:         make(map[*Validator]*Message),
+		justifiedMsg:  make(map[uint64]Messager),
+		pendingMsg:    make(map[uint64]Messager),
+		numMissDepend: make(map[uint64]int),
+		msgDepend:     make(map[uint64][]uint64),
+		latestMsg:     make(map[AbstractValidator]Messager),
 	}
-	v.AddMessages(messages)
+	v.AddMessages(msg)
 	return v
 }
 
+func (v *View) JustifiedMsg() map[uint64]Messager {
+	return v.justifiedMsg
+}
+
+func (v *View) LatestMsg() map[AbstractValidator]Messager {
+	return v.latestMsg
+}
+
 func (v *View) Estimate() interface{} {
-	// panic("need to be implemented")
-	// todo
 	return 0
 }
 
+func (v *View) UpdateSafeEstimates() {
+	panic("implement me")
+}
+
 // AddMessages 添加新的message到pending或者justify
-func (v *View) AddMessages(messages []*Message) {
-	for _, message := range messages {
-		if _, ok := v.PendingMessages[message.Hash()]; ok {
+func (v *View) AddMessages(msgs []Messager) {
+	for _, msg := range msgs {
+		if _, ok := v.pendingMsg[msg.Hash()]; ok {
 			continue
 		}
-		if _, ok := v.JustifiedMessages[message.Hash()]; ok {
+		if _, ok := v.justifiedMsg[msg.Hash()]; ok {
 			continue
 		}
-		missingMessageHashes := v.MissingMessageInJustification(message)
-		if len(missingMessageHashes) == 0 {
-			v.ReceiveJustifiedMessage(message)
+		missMsgHashes := v.missMsgInJustify(msg)
+		if len(missMsgHashes) == 0 {
+			v.ReceiveJustifiedMessage(msg)
 		} else {
-			v.ReceivePendingMessage(message, missingMessageHashes)
+			v.ReceivePendingMessage(msg, missMsgHashes)
 		}
 	}
 }
 
 // ReceiveJustifiedMessage 在收到已验证的消息后,处理等待队列并添加到View中
-func (v *View) ReceiveJustifiedMessage(m *Message) {
+func (v *View) ReceiveJustifiedMessage(m Messager) {
 	messages := v.GetNewlyJustifiedMessage(m)
 	for _, message := range messages {
 		v.AddToLatestMessage(message)
@@ -59,71 +69,71 @@ func (v *View) ReceiveJustifiedMessage(m *Message) {
 }
 
 // ReceivePendingMessage 更新待验证消息
-func (v *View) ReceivePendingMessage(m *Message, hashes []uint64) {
+func (v *View) ReceivePendingMessage(m Messager, hashes []uint64) {
 	h := m.Hash()
-	v.PendingMessages[h] = m
-	v.NumMissingDependencies[h] = len(hashes)
+	v.pendingMsg[h] = m
+	v.numMissDepend[h] = len(hashes)
 
 	for _, hash := range hashes {
-		if _, ok := v.DependenciesOfMessage[hash]; !ok {
-			v.DependenciesOfMessage[hash] = make([]uint64, 0, 4)
+		if _, ok := v.msgDepend[hash]; !ok {
+			v.msgDepend[hash] = make([]uint64, 0, 4)
 		}
-		v.DependenciesOfMessage[hash] = append(v.DependenciesOfMessage[hash], h)
+		v.msgDepend[hash] = append(v.msgDepend[hash], h)
 	}
 
 }
 
 // GetNewlyJustifiedMessage 给定一个刚验证的信息, 得到所有因此得到验证的信息
-func (v *View) GetNewlyJustifiedMessage(m *Message) []*Message {
-	newlyJustifiedMessages := make([]*Message, 0, 4)
+func (v *View) GetNewlyJustifiedMessage(m Messager) []Messager {
+	newlyJustifiedMessages := make([]Messager, 0, 4)
 	newlyJustifiedMessages = append(newlyJustifiedMessages, m)
-	for _, dependentHash := range v.DependenciesOfMessage[m.Hash()] {
-		v.NumMissingDependencies[dependentHash] -= 1
-		if v.NumMissingDependencies[dependentHash] == 0 {
-			newMessage := v.PendingMessages[dependentHash]
+	for _, dependentHash := range v.msgDepend[m.Hash()] {
+		v.numMissDepend[dependentHash] -= 1
+		if v.numMissDepend[dependentHash] == 0 {
+			newMessage := v.pendingMsg[dependentHash]
 			newlyJustifiedMessages = append(newlyJustifiedMessages, v.GetNewlyJustifiedMessage(newMessage)...)
 		}
 	}
 	return newlyJustifiedMessages
 }
 
-func (v *View) UpdateProtocolSpecificView(m *Message) {
-	return
+func (v *View) UpdateProtocolSpecificView(m Messager) {
+	// 未实现
 }
 
 // AddToLatestMessage 更新validator的最新消息
-func (v *View) AddToLatestMessage(m *Message) {
-	if _, ok := v.LatestMessages[m.Sender]; !ok {
-		v.LatestMessages[m.Sender] = m
-	} else if v.LatestMessages[m.Sender].SeqNum < m.SeqNum {
-		v.LatestMessages[m.Sender] = m
+func (v *View) AddToLatestMessage(m Messager) {
+	if _, ok := v.latestMsg[m.Sender()]; !ok {
+		v.latestMsg[m.Sender()] = m
+	} else if v.latestMsg[m.Sender()].SeqNum() < m.SeqNum() {
+		v.latestMsg[m.Sender()] = m
 	}
 }
 
 // AddJustifiedRemovePending 添加已验证的消息并删除相关数据
-func (v *View) AddJustifiedRemovePending(m *Message) {
+func (v *View) AddJustifiedRemovePending(m Messager) {
 	h := m.Hash()
-	v.JustifiedMessages[h] = m
-	if _, ok := v.NumMissingDependencies[h]; ok {
-		delete(v.NumMissingDependencies, h)
+	v.justifiedMsg[h] = m
+	if _, ok := v.numMissDepend[h]; ok {
+		delete(v.numMissDepend, h)
 	}
-	if _, ok := v.DependenciesOfMessage[h]; ok {
-		delete(v.DependenciesOfMessage, h)
+	if _, ok := v.msgDepend[h]; ok {
+		delete(v.msgDepend, h)
 	}
-	if _, ok := v.PendingMessages[h]; ok {
-		delete(v.PendingMessages, h)
+	if _, ok := v.pendingMsg[h]; ok {
+		delete(v.pendingMsg, h)
 	}
 }
 
-// MissingMessageInJustification 返回该消息中已验证但是本View中未验证消息的哈希值
-func (v *View) MissingMessageInJustification(m *Message) []uint64 {
+// missMsgInJustify 返回该消息中已验证但是本View中未验证消息的哈希值
+func (v *View) missMsgInJustify(m Messager) []uint64 {
 	values := make(map[uint64]bool)
-	for _, value := range m.Justification {
+	for _, value := range m.Justification() {
 		values[value] = true
 	}
 	result := make([]uint64, 0, 4)
 	for value := range values {
-		if _, ok := v.JustifiedMessages[value]; !ok {
+		if _, ok := v.justifiedMsg[value]; !ok {
 			result = append(result, value)
 		}
 	}

@@ -4,12 +4,12 @@ import "testing"
 
 func TestValidator_InitializeView(t *testing.T) {
 	v := &Validator{
-		Name:         0,
-		Weight:       1,
-		ValidatorSet: nil,
+		name:   0,
+		weight: 1,
+		valSet: nil,
 	}
 	v.InitializeView(nil)
-	if v.View == nil {
+	if v.view == nil {
 		t.Errorf("error")
 	}
 

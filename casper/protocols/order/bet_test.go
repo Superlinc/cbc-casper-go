@@ -16,22 +16,8 @@ func TestIsValid(t *testing.T) {
 }
 
 func TestBet_ConflictWith(t *testing.T) {
-	m1 := &casper.Message{
-		Sender:        nil,
-		Estimate:      list.New(),
-		Justification: nil,
-		SeqNum:        0,
-		DisplayHeight: 0,
-		Header:        0,
-	}
-	m2 := &casper.Message{
-		Sender:        nil,
-		Estimate:      list.New(),
-		Justification: nil,
-		SeqNum:        0,
-		DisplayHeight: 0,
-		Header:        0,
-	}
+	m1 := casper.NewMessage(list.New(), nil, nil, 0, 0)
+	m2 := casper.NewMessage(list.New(), nil, nil, 0, 0)
 	l1 := m1.Estimate.(*list.List)
 	l2 := m2.Estimate.(*list.List)
 	l1.PushBack(1)

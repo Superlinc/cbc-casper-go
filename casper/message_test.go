@@ -7,7 +7,7 @@ import (
 
 func TestHash(t *testing.T) {
 	m := &Message{
-		Header: 1.0,
+		header: 1.0,
 	}
 	fmt.Println(m.Hash())
 }

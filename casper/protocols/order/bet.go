@@ -27,8 +27,9 @@ func listEqual(l1, l2 *list.List) bool {
 	return true
 }
 
-func (b *Bet) ConflictWith(message *casper.Message) (bool, error) {
-	if !isValidEstimate(b.Estimate) {
+func (b *Bet) ConflictWith(m interface{}) (bool, error) {
+	message := m.(*casper.Message)
+	if !isValidEstimate(message.Estimate) {
 		return true, errors.New("message should be list")
 	}
 	l1 := b.Estimate.(*list.List)

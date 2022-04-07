@@ -1,7 +1,5 @@
 package protocols
 
-import "cbc-casper-go/casper"
-
 type Bet interface {
-	ConflictWith(message *casper.Message) (bool, error)
+	ConflictWith(message interface{}) (bool, error)
 }
