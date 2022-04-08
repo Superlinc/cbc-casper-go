@@ -3,13 +3,11 @@ package blockchain
 import "cbc-casper-go/casper"
 
 func getForkChoice(lastFinBlk *Block, children map[*Block][]*Block, latestMsg map[casper.AbstractValidator]casper.Messager) interface{} {
-	scores := make(map[interface{}]uint64)
-	for validator, curMsg := range latestMsg {
-		curBlk := &Block{curMsg.(*casper.Message)}
-		// todo 修改message抽象的结构
-		for curBlk != nil && curBlk.Hash() != lastFinBlk.Hash() {
-			scores[curBlk] += validator.Weight()
-			curBlk = curBlk.Estimate.(*Block)
+	scores := make(map[*Block]uint64)
+	for validator, curBlk := range latestMsg {
+		for curBlk != nil && curBlk != lastFinBlk {
+			scores[curBlk.(*Block)] += validator.Weight()
+			curBlk = curBlk.(*Block).Estimate.(*Block)
 		}
 	}
 	bestBlk := lastFinBlk
@@ -20,7 +18,7 @@ func getForkChoice(lastFinBlk *Block, children map[*Block][]*Block, latestMsg ma
 		curScores := make(map[*Block]uint64)
 		var maxScore uint64
 		for _, child := range children[bestBlk] {
-			curScores[child] += scores[children]
+			curScores[child] += scores[child]
 			maxScore = casper.MaxUint(maxScore, curScores[child])
 		}
 

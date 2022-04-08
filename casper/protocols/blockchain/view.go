@@ -33,7 +33,7 @@ func (v *View) UpdateSafeEstimates(valset *casper.ValidatorSet) {
 	}
 }
 
-func (v View) updateProtocolSpecificView(block *Block) {
+func (v *View) updateProtocolSpecificView(block *Block) {
 	if _, ok := v.JustifiedMsg()[block.Hash()]; ok {
 		_ = fmt.Errorf("error")
 	}

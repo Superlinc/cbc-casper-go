@@ -46,7 +46,7 @@ func (v *Validator) MyLatestMessage() Messager {
 
 // MakeNewMessage 为该验证器生成一条最新消息
 func (v *Validator) MakeNewMessage() Messager {
-	newMsg := NewMessage(v.Estimate(), v.Justification(), v, v.NextSeqNum(), v.NextDisPlayHeight())
+	newMsg := NewMessage(v.Estimate(), v.Justification(), v, v.nextSeqNum(), v.nextDisplayHeight())
 	v.view.AddMessages([]Messager{newMsg})
 	return newMsg
 }
@@ -60,8 +60,8 @@ func (v *Validator) Justification() map[AbstractValidator]uint64 {
 	return latestMsgHashes
 }
 
-// NextSeqNum 返回该验证器下一个序列号
-func (v *Validator) NextSeqNum() uint64 {
+// nextSeqNum 返回该验证器下一个序列号
+func (v *Validator) nextSeqNum() uint64 {
 	msg := v.MyLatestMessage()
 	if msg != nil {
 		return msg.SeqNum() + 1
@@ -71,8 +71,8 @@ func (v *Validator) NextSeqNum() uint64 {
 
 }
 
-// NextDisPlayHeight 返回下一个区块号
-func (v *Validator) NextDisPlayHeight() uint64 {
+// nextDisplayHeight 返回下一个区块号
+func (v *Validator) nextDisplayHeight() uint64 {
 	if len(v.view.LatestMsg()) == 0 {
 		return 0
 	}

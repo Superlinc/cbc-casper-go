@@ -51,25 +51,25 @@ func (v *View) AddMessages(msgs []Messager) {
 		}
 		missMsgHashes := v.missMsgInJustify(msg)
 		if len(missMsgHashes) == 0 {
-			v.ReceiveJustifiedMessage(msg)
+			v.receiveJustifiedMsg(msg)
 		} else {
-			v.ReceivePendingMessage(msg, missMsgHashes)
+			v.receivePendingMsg(msg, missMsgHashes)
 		}
 	}
 }
 
-// ReceiveJustifiedMessage 在收到已验证的消息后,处理等待队列并添加到View中
-func (v *View) ReceiveJustifiedMessage(m Messager) {
-	messages := v.GetNewlyJustifiedMessage(m)
+// receiveJustifiedMsg 在收到已验证的消息后,处理等待队列并添加到View中
+func (v *View) receiveJustifiedMsg(m Messager) {
+	messages := v.getJustifiedMsg(m)
 	for _, message := range messages {
 		v.AddToLatestMessage(message)
 		v.AddJustifiedRemovePending(message)
-		v.UpdateProtocolSpecificView(message)
+		// v.updateProtocolSpecificView(message)
 	}
 }
 
-// ReceivePendingMessage 更新待验证消息
-func (v *View) ReceivePendingMessage(m Messager, hashes []uint64) {
+// receivePendingMsg 更新待验证消息
+func (v *View) receivePendingMsg(m Messager, hashes []uint64) {
 	h := m.Hash()
 	v.pendingMsg[h] = m
 	v.numMissDepend[h] = len(hashes)
@@ -83,22 +83,18 @@ func (v *View) ReceivePendingMessage(m Messager, hashes []uint64) {
 
 }
 
-// GetNewlyJustifiedMessage 给定一个刚验证的信息, 得到所有因此得到验证的信息
-func (v *View) GetNewlyJustifiedMessage(m Messager) []Messager {
+// getJustifiedMsg 给定一个刚验证的信息, 得到所有因此得到验证的信息
+func (v *View) getJustifiedMsg(m Messager) []Messager {
 	newlyJustifiedMessages := make([]Messager, 0, 4)
 	newlyJustifiedMessages = append(newlyJustifiedMessages, m)
 	for _, dependentHash := range v.msgDepend[m.Hash()] {
 		v.numMissDepend[dependentHash] -= 1
 		if v.numMissDepend[dependentHash] == 0 {
 			newMessage := v.pendingMsg[dependentHash]
-			newlyJustifiedMessages = append(newlyJustifiedMessages, v.GetNewlyJustifiedMessage(newMessage)...)
+			newlyJustifiedMessages = append(newlyJustifiedMessages, v.getJustifiedMsg(newMessage)...)
 		}
 	}
 	return newlyJustifiedMessages
-}
-
-func (v *View) UpdateProtocolSpecificView(m Messager) {
-	// 未实现
 }
 
 // AddToLatestMessage 更新validator的最新消息

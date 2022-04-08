@@ -9,20 +9,24 @@ type Block struct {
 	*casper.Message
 }
 
-func (b *Block) ConflictWith(message interface{}) (bool, error) {
+func (b *Block) ConflictWith(message casper.Messager) (bool, error) {
 	if !isValidEstimate(message) {
 		return false, errors.New("error message")
 	}
-	return b.isInBlockChain(message.(*Block)), nil
+	return b.isInBlockChain(message), nil
 }
 
-func (b *Block) isInBlockChain(block *Block) bool {
+func (b *Block) isInBlockChain(m casper.Messager) bool {
+	block, ok := m.(*Block)
+	if !ok {
+		return false
+	}
 	if block == b {
 		return true
 	} else if block == nil {
 		return false
 	} else {
-		return b.isInBlockChain(block.Estimate.(*Block))
+		return b.isInBlockChain(block.Estimate.(casper.Messager))
 	}
 }
 

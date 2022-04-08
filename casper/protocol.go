@@ -34,9 +34,9 @@ func NewProtocol(weights []uint64, execution string, messagePerRound uint64) *Pr
 		namesFromHash:    make(map[uint64]string),
 		handlers:         make(map[string]func(*Protocol, AbstractValidator, string)),
 	}
-	protocol.RegisterHandler("M", (*Protocol).MakeMessage)
-	protocol.RegisterHandler("S", (*Protocol).SendMessage)
-	protocol.RegisterHandler("SJ", (*Protocol).SendAndJustify)
+	protocol.RegisterHandler("M", (*Protocol).makeMsg)
+	protocol.RegisterHandler("S", (*Protocol).sendMsg)
+	protocol.RegisterHandler("SJ", (*Protocol).sendAndJustify)
 	return protocol
 }
 
@@ -60,22 +60,22 @@ func (p *Protocol) RegisterMessage(message Messager, name string) {
 	p.view.AddMessages([]Messager{message})
 }
 
-// MakeMessage 使用该验证器生成消息
-func (p *Protocol) MakeMessage(validator AbstractValidator, messageName string) {
+// makeMsg 使用该验证器生成消息
+func (p *Protocol) makeMsg(validator AbstractValidator, messageName string) {
 	newMessage := validator.MakeNewMessage()
 	p.RegisterMessage(newMessage, messageName)
 }
 
-// SendMessage 给该验证器传递一个消息
-func (p *Protocol) SendMessage(validator AbstractValidator, messageName string) {
+// sendMsg 给该验证器传递一个消息
+func (p *Protocol) sendMsg(validator AbstractValidator, messageName string) {
 	message := p.Msgs[messageName]
 	validator.ReceiveMessages([]Messager{message})
 }
 
-// SendAndJustify 传递消息以及其依赖
-func (p *Protocol) SendAndJustify(validator AbstractValidator, messageName string) {
+// sendAndJustify 传递消息以及其依赖
+func (p *Protocol) sendAndJustify(validator AbstractValidator, messageName string) {
 	message := p.Msgs[messageName]
-	messageToSend := p.MessagesNeededToJustify(message, validator)
+	messageToSend := p.msgNeededJustify(message, validator)
 	//for _, msg := range messageToSend {
 	//	fmt.Println(p.namesFromHash[msg.Hash()])
 	//	for _, hash := range msg.Justification {
@@ -86,7 +86,7 @@ func (p *Protocol) SendAndJustify(validator AbstractValidator, messageName strin
 }
 
 // MessagesNeededToJustify 返回消息及未验证依赖
-func (p *Protocol) MessagesNeededToJustify(message Messager, validator AbstractValidator) []Messager {
+func (p *Protocol) msgNeededJustify(message Messager, validator AbstractValidator) []Messager {
 	messageNeeded := hashset.New(message)
 	messageHashes := hashset.New(message.Hash())
 	for messageHashes.Size() != 0 {

@@ -10,7 +10,7 @@ type Bet struct {
 	*casper.Message
 }
 
-func (b *Bet) ConflictWith(m interface{}) (bool, error) {
+func (b *Bet) ConflictWith(m casper.Messager) (bool, error) {
 	message := m.(*casper.Message)
 	if message.Estimate != 0 && message.Estimate != 1 {
 		_ = fmt.Errorf("estimate should be binary")
