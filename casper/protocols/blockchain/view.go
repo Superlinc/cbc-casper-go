@@ -42,3 +42,28 @@ func (v *View) updateProtocolSpecificView(block *Block) {
 	}
 	v.children[block.Estimate.(*Block)] = append(v.children[block.Estimate.(*Block)], block)
 }
+
+// AddMessages 添加新的message到pending或者justify
+func (v *View) AddMessages(msgs []casper.Messager) {
+	for _, msg := range msgs {
+		if v.Contain(msg) {
+			continue
+		}
+		missMsgHashes := v.MissMsgInJustify(msg)
+		if len(missMsgHashes) == 0 {
+			v.ReceiveJustifiedMsg(msg)
+		} else {
+			v.ReceivePendingMsg(msg, missMsgHashes)
+		}
+	}
+}
+
+// ReceiveJustifiedMsg 在收到已验证的消息后,处理等待队列并添加到View中
+func (v *View) ReceiveJustifiedMsg(m casper.Messager) {
+	messages := v.GetJustifiedMsg(m)
+	for _, message := range messages {
+		v.AddToLatestMessage(message)
+		v.AddJustifiedRemovePending(message)
+		v.updateProtocolSpecificView(message.(*Block))
+	}
+}

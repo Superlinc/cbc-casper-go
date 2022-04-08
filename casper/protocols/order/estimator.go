@@ -6,7 +6,7 @@ import (
 	"sort"
 )
 
-func getEstimate(latestMessage map[casper.AbstractValidator]casper.Messager) *list.List {
+func getEstimate(latestMessage map[*casper.Validator]casper.Messager) *list.List {
 	weights := make(map[interface{}]uint64)
 
 	for validator, m := range latestMessage {

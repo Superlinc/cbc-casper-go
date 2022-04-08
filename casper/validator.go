@@ -12,7 +12,7 @@ func init() {
 type Validator struct {
 	name   int
 	weight uint64
-	valSet ValidatorSetor
+	valSet *ValidatorSet
 	view   Viewer
 }
 
@@ -29,7 +29,8 @@ func (v *Validator) View() Viewer {
 }
 
 func (v *Validator) InitializeView(messages []Messager) {
-	v.view = NewView(messages)
+	v.view = NewView()
+	v.view.AddMessages(messages)
 }
 
 func (v *Validator) ReceiveMessages(messages []Messager) {
@@ -52,8 +53,8 @@ func (v *Validator) MakeNewMessage() Messager {
 }
 
 // Justification 返回最新消息的哈希值
-func (v *Validator) Justification() map[AbstractValidator]uint64 {
-	latestMsgHashes := make(map[AbstractValidator]uint64)
+func (v *Validator) Justification() map[*Validator]uint64 {
+	latestMsgHashes := make(map[*Validator]uint64)
 	for validator := range v.view.LatestMsg() {
 		latestMsgHashes[validator] = v.view.LatestMsg()[validator].Hash()
 	}

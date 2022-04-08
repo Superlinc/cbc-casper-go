@@ -6,7 +6,7 @@ import (
 )
 
 // 在给定的消息中取得共识
-func getEstimate(latestMessage map[casper.AbstractValidator]casper.Messager) int {
+func getEstimate(latestMessage map[*casper.Validator]casper.Messager) int {
 	msgs := make([]casper.Messager, 0, len(latestMessage))
 	for _, v := range latestMessage {
 		msgs = append(msgs, v)

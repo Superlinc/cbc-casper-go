@@ -7,7 +7,7 @@ import (
 func TestNewValidatorSet(t *testing.T) {
 	weights := []uint64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	vs := NewValidatorSet(weights)
-	valSet := vs.(*ValidatorSet)
+	valSet := vs
 	if valSet.validators.Size() != len(weights) {
 		t.Errorf("error")
 	}

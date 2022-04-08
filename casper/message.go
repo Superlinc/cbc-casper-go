@@ -12,15 +12,15 @@ func init() {
 }
 
 type Message struct {
-	sender        AbstractValidator
+	sender        *Validator
 	Estimate      interface{}
-	justification map[AbstractValidator]uint64
+	justification map[*Validator]uint64
 	seqNum        uint64
 	disHeight     uint64
 	header        float64
 }
 
-func NewMessage(estimate interface{}, justification map[AbstractValidator]uint64, sender AbstractValidator, seqNum uint64, disHeight uint64) *Message {
+func NewMessage(estimate interface{}, justification map[*Validator]uint64, sender *Validator, seqNum uint64, disHeight uint64) *Message {
 	return &Message{
 		Estimate:      estimate,
 		justification: justification,
@@ -31,11 +31,11 @@ func NewMessage(estimate interface{}, justification map[AbstractValidator]uint64
 	}
 }
 
-func (m *Message) Sender() AbstractValidator {
+func (m *Message) Sender() *Validator {
 	return m.sender
 }
 
-func (m *Message) Justification() map[AbstractValidator]uint64 {
+func (m *Message) Justification() map[*Validator]uint64 {
 	return m.justification
 }
 

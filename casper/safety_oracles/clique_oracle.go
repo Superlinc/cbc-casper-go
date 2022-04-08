@@ -12,18 +12,18 @@ type CliqueOracle struct {
 	candidateEstimate protocols.Bet
 	View              *View
 	ValSet            *ValidatorSet
-	candidates        []AbstractValidator
+	candidates        []*Validator
 }
 
 func NewCliqueOracle(bet protocols.Bet, view *View, valSet *ValidatorSet) (*CliqueOracle, error) {
 	if bet == nil {
 		return nil, errors.New("cannot decide if safe without an estimate")
 	}
-	candidates := make([]AbstractValidator, 0, 4)
+	candidates := make([]*Validator, 0, 4)
 	for _, v := range valSet.Validators() {
 		if _, ok := view.LatestMsg()[v]; ok {
 			if ok, _ := bet.ConflictWith(view.LatestMsg()[v]); !ok {
-				candidates = append(candidates, v.(*Validator))
+				candidates = append(candidates, v)
 			}
 		}
 	}

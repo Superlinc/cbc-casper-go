@@ -45,7 +45,7 @@ func parseJson(jsonStr string) (*JsonBase, error) {
 func (p *Protocol) SetInitMsg(estimates []int) {
 	for _, validator := range p.ValSet.Validators() {
 		msg := &Bet{
-			casper.NewMessage(estimates[validator.Name()], make(map[casper.AbstractValidator]uint64), validator, 0, 0),
+			casper.NewMessage(estimates[validator.Name()], make(map[*casper.Validator]uint64), validator, 0, 0),
 		}
 		p.RegisterMessage(msg.Message, casper.GetRandomStr(10))
 		validator.InitializeView([]casper.Messager{msg.Message})

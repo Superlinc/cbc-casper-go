@@ -20,13 +20,14 @@ func NewBlockchainProtocol(jsonStr string, reportInterval uint64) (*Protocol, er
 	protocol := casper.NewProtocol(parsedJson.Conf.Validators,
 		parsedJson.Exec.ExeStr,
 		parsedJson.Exec.MsgPerRound*reportInterval)
-	orderProtocol := &Protocol{
+	blockchainProtocol := &Protocol{
 		protocol,
 	}
-	return orderProtocol, nil
+	return blockchainProtocol, nil
 }
 
 func parseJson(jsonStr string) (*JsonBase, error) {
+	// todo 改造为解析block
 	var parsedJson JsonBase
 	err := json.Unmarshal([]byte(jsonStr), &parsedJson)
 	if err != nil {
@@ -50,11 +51,9 @@ func parseJson(jsonStr string) (*JsonBase, error) {
 	return &parsedJson, nil
 }
 
-func (p *Protocol) SetInitMsg(estimates []int) {
+func (p *Protocol) SetInitMsg(estimates []*Block) {
 	for _, validator := range p.ValSet.Validators() {
-		msg := &Block{
-			casper.NewMessage(estimates[validator.Name()], make(map[casper.AbstractValidator]uint64), validator, 0, 0),
-		}
+		msg := NewBlock(estimates[validator.Name()], make(map[*casper.Validator]uint64), validator, 0, 0)
 		p.RegisterMessage(msg.Message, casper.GetRandomStr(10))
 		validator.InitializeView([]casper.Messager{msg.Message})
 	}

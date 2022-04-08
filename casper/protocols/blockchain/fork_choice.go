@@ -2,7 +2,7 @@ package blockchain
 
 import "cbc-casper-go/casper"
 
-func getForkChoice(lastFinBlk *Block, children map[*Block][]*Block, latestMsg map[casper.AbstractValidator]casper.Messager) interface{} {
+func getForkChoice(lastFinBlk *Block, children map[*Block][]*Block, latestMsg map[*casper.Validator]casper.Messager) interface{} {
 	scores := make(map[*Block]uint64)
 	for validator, curBlk := range latestMsg {
 		for curBlk != nil && curBlk != lastFinBlk {
