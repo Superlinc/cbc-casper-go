@@ -48,7 +48,6 @@ func (v *Validator) MyLatestMessage() Messager {
 // MakeNewMessage 为该验证器生成一条最新消息
 func (v *Validator) MakeNewMessage() Messager {
 	newMsg := NewMessage(v.Estimate(), v.Justification(), v, v.nextSeqNum(), v.nextDisplayHeight())
-	v.view.AddMessages([]Messager{newMsg})
 	return newMsg
 }
 

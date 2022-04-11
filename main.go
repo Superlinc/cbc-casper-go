@@ -5,7 +5,7 @@ import "fmt"
 func main() {
 	var bb t
 	bb = &b{}
-	bb.foo2()
+	bb.(*b).a.foo()
 }
 
 type a int

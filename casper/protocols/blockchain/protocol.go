@@ -23,7 +23,21 @@ func NewBlockchainProtocol(jsonStr string, reportInterval uint64) (*Protocol, er
 	blockchainProtocol := &Protocol{
 		protocol,
 	}
+	blockchainProtocol.RegisterHandler("M", makeBlk)
 	return blockchainProtocol, nil
+}
+
+func makeBlk(p *casper.Protocol, validator *casper.Validator, messageName string) {
+	newMsg := validator.MakeNewMessage().(*casper.Message)
+	newBlk := &Block{
+		Message: newMsg,
+		height:  1,
+	}
+	if newMsg.Estimate != nil {
+		newBlk.height = newMsg.Estimate.(*Block).height + 1
+	}
+	validator.ReceiveMessages([]casper.Messager{newBlk})
+	p.RegisterMessage(newBlk, messageName)
 }
 
 func parseJson(jsonStr string) (*JsonBase, error) {

@@ -40,34 +40,6 @@ func TestBlock_ConflictWith(t *testing.T) {
 	}
 }
 
-func TestBlock_isInBlockChain(t *testing.T) {
-	type fields struct {
-		Message *casper.Message
-	}
-	type args struct {
-		m casper.Messager
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   bool
-	}{
-		// TODO: Add test cases.
-		{},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			b := &Block{
-				Message: tt.fields.Message,
-			}
-			if got := b.isInBlockChain(tt.args.m); got != tt.want {
-				t.Errorf("isInBlockChain() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
 func Test_isValidEstimate(t *testing.T) {
 	type args struct {
 		estimate interface{}

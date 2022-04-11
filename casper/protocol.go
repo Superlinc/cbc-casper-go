@@ -62,8 +62,9 @@ func (p *Protocol) RegisterMessage(message Messager, name string) {
 
 // makeMsg 使用该验证器生成消息
 func (p *Protocol) makeMsg(validator *Validator, messageName string) {
-	newMessage := validator.MakeNewMessage()
-	p.RegisterMessage(newMessage, messageName)
+	msg := validator.MakeNewMessage()
+	validator.ReceiveMessages([]Messager{msg})
+	p.RegisterMessage(msg, messageName)
 }
 
 // sendMsg 给该验证器传递一个消息
