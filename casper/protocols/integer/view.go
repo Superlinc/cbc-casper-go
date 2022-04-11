@@ -11,7 +11,14 @@ type View struct {
 	lastFinalEstimate *casper.Message
 }
 
-func (v *View) Estimate() int {
+func NewView() casper.Viewer {
+	return &View{
+		casper.NewView().(*casper.View),
+		nil,
+	}
+}
+
+func (v *View) Estimate() interface{} {
 	return getEstimate(v.LatestMsg())
 }
 

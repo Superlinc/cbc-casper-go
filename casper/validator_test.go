@@ -8,7 +8,7 @@ func TestValidator_InitializeView(t *testing.T) {
 		weight: 1,
 		valSet: nil,
 	}
-	v.InitializeView(nil)
+	v.InitializeView(NewView(), nil)
 	if v.view == nil {
 		t.Errorf("error")
 	}

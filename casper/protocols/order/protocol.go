@@ -17,8 +17,13 @@ func NewOrderProtocol(jsonStr string, reportInterval uint64) (*Protocol, error) 
 	if parsedJson == nil || err != nil {
 		return nil, err
 	}
+	views := make([]casper.Viewer, 0, len(parsedJson.Conf.Validators))
+	for range parsedJson.Conf.Validators {
+		views = append(views, NewView())
+	}
 	protocol := casper.NewProtocol(parsedJson.Conf.Validators,
-		parsedJson.Exec.ExeStr,
+		NewView(),
+		views,
 		parsedJson.Exec.MsgPerRound*reportInterval)
 	orderProtocol := &Protocol{
 		protocol,
@@ -56,6 +61,6 @@ func (p *Protocol) SetInitMsg(estimates []*list.List) {
 			casper.NewMessage(estimates[validator.Name()], make(map[*casper.Validator]uint64), validator, 0, 0),
 		}
 		p.RegisterMessage(msg.Message, casper.GetRandomStr(10))
-		validator.InitializeView([]casper.Messager{msg.Message})
+		validator.InitializeView(NewView(), []casper.Messager{msg.Message})
 	}
 }

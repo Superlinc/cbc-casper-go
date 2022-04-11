@@ -7,7 +7,7 @@ import (
 )
 
 func TestView_JustificationStoreHash(t *testing.T) {
-	p := NewProtocol([]uint64{1, 2}, "", 10)
+	p := NewProtocol([]uint64{1, 2}, NewView(), nil, 10)
 	p.Execute("M-0-A SJ-1-A M-1-B")
 	v0 := p.ValSet.GetValByName(0)
 	v1 := p.ValSet.GetValByName(1)
@@ -24,7 +24,7 @@ func TestView_JustificationStoreHash(t *testing.T) {
 }
 
 func TestView_ReceiveJustifiedMessage(t *testing.T) {
-	p := NewProtocol([]uint64{1, 2}, "", 10)
+	p := NewProtocol([]uint64{1, 2}, NewView(), nil, 10)
 	p.Execute("M-0-A M-0-B S-1-B M-1-C")
 	v0 := p.ValSet.GetValByName(0)
 	v1 := p.ValSet.GetValByName(1)
@@ -44,7 +44,7 @@ func TestView_ReceiveJustifiedMessage(t *testing.T) {
 		t.Errorf("error")
 	}
 	p.Execute("SJ-1-B")
-	//for hash := range v1.view.pendingMsg {
+	//for hash := range v1.globalView.pendingMsg {
 	//	fmt.Println(p.namesFromHash[hash])
 	//}
 	j = v1.Justification()
@@ -58,7 +58,7 @@ func TestView_ReceiveJustifiedMessage(t *testing.T) {
 }
 
 func TestView_AddJustifiedMessage(t *testing.T) {
-	p := NewProtocol([]uint64{1, 2}, "", 10)
+	p := NewProtocol([]uint64{1, 2}, NewView(), nil, 10)
 	p.Execute("M-0-A M-0-B SJ-1-A")
 	v0 := p.ValSet.GetValByName(0)
 	v1 := p.ValSet.GetValByName(1)
@@ -89,7 +89,7 @@ func TestView_AddJustifiedMessage(t *testing.T) {
 }
 
 func TestView_MultipleMessage(t *testing.T) {
-	p := NewProtocol([]uint64{1, 2}, "", 10)
+	p := NewProtocol([]uint64{1, 2}, NewView(), nil, 10)
 	p.Execute("M-0-A SJ-1-A M-0-B M-0-C M-0-D M-0-E M-0-F S-1-F")
 	v1 := p.ValSet.GetValByName(1)
 	pendingSet := hashset.New()
@@ -99,7 +99,7 @@ func TestView_MultipleMessage(t *testing.T) {
 	if !pendingSet.Contains(p.Msgs["F"]) {
 		t.Errorf("error")
 	}
-	for _, v := range p.view.JustifiedMsg() {
+	for _, v := range p.globalView.JustifiedMsg() {
 		v1.ReceiveMessages([]Messager{v})
 	}
 	justifySet := hashset.New()

@@ -104,7 +104,7 @@ func TestGetEstimate(t *testing.T) {
 
 func testGetEstimate(weights []uint64, latestEstimates map[int]*list.List, target *list.List, t *testing.T) {
 	latestMsg := make(map[*casper.Validator]casper.Messager)
-	valSet := casper.NewValidatorSet(weights)
+	valSet := casper.NewValidatorSet(weights, nil)
 	for name, esti := range latestEstimates {
 		val := valSet.GetValByName(name)
 		latestMsg[val] = casper.NewMessage(esti, nil, val, 1, 1)

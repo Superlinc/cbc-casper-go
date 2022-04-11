@@ -75,3 +75,13 @@ func GenerateOrderJsonString(weights []uint64, exeStr string, estimates []interf
 	}
 	return str
 }
+
+func GenerateBlockchainJsonString(weights []uint64, exeStr string, estimates []interface{}) string {
+	data := makeBaseObj("blockchain", exeStr, weights, estimates)
+	var str string
+	if bs, err := json.Marshal(data); err == nil {
+		str = string(bs)
+		// fmt.Println("generate successfully")
+	}
+	return str
+}

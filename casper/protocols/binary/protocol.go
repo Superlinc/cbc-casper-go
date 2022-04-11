@@ -18,7 +18,8 @@ func NewBinaryProtocol(jsonStr string, reportInterval uint64) (*Protocol, error)
 		return nil, err
 	}
 	protocol := casper.NewProtocol(parsedJson.Conf.Validators,
-		parsedJson.Exec.ExeStr,
+		casper.NewView(),
+		nil,
 		parsedJson.Exec.MsgPerRound*reportInterval)
 	binaryProtocol := &Protocol{protocol}
 
@@ -48,6 +49,6 @@ func (p *Protocol) SetInitMsg(estimates []int) {
 			casper.NewMessage(estimates[validator.Name()], make(map[*casper.Validator]uint64), validator, 0, 0),
 		}
 		p.RegisterMessage(msg.Message, casper.GetRandomStr(10))
-		validator.InitializeView([]casper.Messager{msg.Message})
+		validator.InitializeView(casper.NewView(), []casper.Messager{msg.Message})
 	}
 }

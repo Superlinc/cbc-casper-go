@@ -25,21 +25,21 @@ func (b *Block) ConflictWith(message casper.Messager) (bool, error) {
 	if !isValidEstimate(message) {
 		return false, errors.New("error message")
 	}
-	return b.isInBlockChain(message), nil
+	return !b.isInBlockChain(message), nil
 }
 
 func (b *Block) isInBlockChain(m casper.Messager) bool {
 	if m == nil {
-		return true
+		return false
 	}
 	block, ok := m.(*Block)
 	if !ok {
-		return true
+		return false
 	}
 	if block == b {
-		return false
-	} else if block == nil || block.Estimate == nil {
 		return true
+	} else if block == nil || block.Estimate == nil {
+		return false
 	} else {
 		return b.isInBlockChain(block.Estimate.(casper.Messager))
 	}

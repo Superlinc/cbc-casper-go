@@ -10,7 +10,7 @@ import (
 
 type Protocol struct {
 	ValSet           *ValidatorSet
-	view             Viewer
+	globalView       Viewer
 	unexecuted       string
 	executed         string
 	messagePerRound  uint64
@@ -21,11 +21,11 @@ type Protocol struct {
 	handlers         map[string]func(*Protocol, *Validator, string)
 }
 
-func NewProtocol(weights []uint64, execution string, messagePerRound uint64) *Protocol {
+func NewProtocol(weights []uint64, view Viewer, views []Viewer, messagePerRound uint64) *Protocol {
 	protocol := &Protocol{
-		ValSet:           NewValidatorSet(weights),
-		view:             NewView(),
-		unexecuted:       execution,
+		ValSet:           NewValidatorSet(weights, views),
+		globalView:       view,
+		unexecuted:       "",
 		executed:         "",
 		messagePerRound:  messagePerRound,
 		messageThisRound: 0,
@@ -57,7 +57,7 @@ func (p *Protocol) RegisterMessage(message Messager, name string) {
 	p.Msgs[name] = message
 	p.msgsFromHash[message.Hash()] = message
 	p.namesFromHash[message.Hash()] = name
-	p.view.AddMessages([]Messager{message})
+	p.globalView.AddMessages([]Messager{message})
 }
 
 // makeMsg 使用该验证器生成消息

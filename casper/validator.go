@@ -28,8 +28,8 @@ func (v *Validator) View() Viewer {
 	return v.view
 }
 
-func (v *Validator) InitializeView(messages []Messager) {
-	v.view = NewView()
+func (v *Validator) InitializeView(view Viewer, messages []Messager) {
+	v.view = view
 	v.view.AddMessages(messages)
 }
 

@@ -13,6 +13,15 @@ type View struct {
 	children   map[*Block][]*Block
 }
 
+func NewView() casper.Viewer {
+	return &View{
+		View:       casper.NewView().(*casper.View),
+		lastFinBlk: nil,
+		genesisBlk: nil,
+		children:   make(map[*Block][]*Block),
+	}
+}
+
 func (v *View) Estimate() interface{} {
 	return getForkChoice(v.lastFinBlk, v.children, v.LatestMsg())
 }

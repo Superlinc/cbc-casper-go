@@ -9,14 +9,20 @@ type ValidatorSet struct {
 	validators *hashset.Set
 }
 
-func NewValidatorSet(weights []uint64) *ValidatorSet {
+func NewValidatorSet(weights []uint64, views []Viewer) *ValidatorSet {
 	validatorSet := &ValidatorSet{validators: hashset.New()}
+	if views == nil {
+		views = make([]Viewer, 0, len(weights))
+		for range weights {
+			views = append(views, NewView())
+		}
+	}
 	for name, weight := range weights {
 		validatorSet.validators.Add(&Validator{
 			name:   name,
 			weight: weight,
 			valSet: validatorSet,
-			view:   NewView(),
+			view:   views[name],
 		})
 	}
 	return validatorSet
