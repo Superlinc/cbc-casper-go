@@ -28,6 +28,7 @@ func NewBlockchainProtocol(jsonStr string, reportInterval uint64) (*Protocol, er
 		protocol,
 	}
 	blockchainProtocol.RegisterHandler("M", makeBlk)
+	blockchainProtocol.SetInitMsg()
 	return blockchainProtocol, nil
 }
 
@@ -59,10 +60,10 @@ func parseJson(jsonStr string) (*JsonBase, error) {
 	return &parsedJson, nil
 }
 
-func (p *Protocol) SetInitMsg(estimates []*Block) {
+func (p *Protocol) SetInitMsg() {
+	genesis := NewBlock(nil, make(map[*casper.Validator]uint64), p.ValSet.GetValByName(0), 0, 0)
+	p.RegisterMessage(genesis, casper.GetRandomStr(10))
 	for _, validator := range p.ValSet.Validators() {
-		msg := NewBlock(estimates[validator.Name()], make(map[*casper.Validator]uint64), validator, 0, 0)
-		p.RegisterMessage(msg.Message, casper.GetRandomStr(10))
-		validator.InitializeView(NewView(), []casper.Messager{msg.Message})
+		validator.InitializeView(NewView(), []casper.Messager{genesis})
 	}
 }

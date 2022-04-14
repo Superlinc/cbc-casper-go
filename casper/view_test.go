@@ -44,7 +44,7 @@ func TestView_ReceiveJustifiedMessage(t *testing.T) {
 		t.Errorf("error")
 	}
 	p.Execute("SJ-1-B")
-	//for hash := range v1.globalView.pendingMsg {
+	//for hash := range v1.GlobalView.pendingMsg {
 	//	fmt.Println(p.NamesFromHash[hash])
 	//}
 	j = v1.Justification()
@@ -99,7 +99,7 @@ func TestView_MultipleMessage(t *testing.T) {
 	if !pendingSet.Contains(p.Msgs["F"]) {
 		t.Errorf("error")
 	}
-	for _, v := range p.globalView.JustifiedMsg() {
+	for _, v := range p.GlobalView.JustifiedMsg() {
 		v1.ReceiveMessages([]Messager{v})
 	}
 	justifySet := hashset.New()

@@ -55,3 +55,12 @@ func Max(set *hashset.Set) uint64 {
 	}
 	return max
 }
+
+func StringListContain(strs []string, str string) bool {
+	for _, s := range strs {
+		if s == str {
+			return true
+		}
+	}
+	return false
+}
