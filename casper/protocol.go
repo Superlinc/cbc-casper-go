@@ -16,8 +16,8 @@ type Protocol struct {
 	messagePerRound  uint64
 	messageThisRound uint64
 	Msgs             map[string]Messager
-	msgsFromHash     map[uint64]Messager
-	namesFromHash    map[uint64]string
+	MsgsFromHash     map[uint64]Messager
+	NamesFromHash    map[uint64]string
 	handlers         map[string]func(*Protocol, *Validator, string)
 }
 
@@ -30,8 +30,8 @@ func NewProtocol(weights []uint64, view Viewer, views []Viewer, messagePerRound 
 		messagePerRound:  messagePerRound,
 		messageThisRound: 0,
 		Msgs:             make(map[string]Messager),
-		msgsFromHash:     make(map[uint64]Messager),
-		namesFromHash:    make(map[uint64]string),
+		MsgsFromHash:     make(map[uint64]Messager),
+		NamesFromHash:    make(map[uint64]string),
 		handlers:         make(map[string]func(*Protocol, *Validator, string)),
 	}
 	protocol.RegisterHandler("M", (*Protocol).makeMsg)
@@ -51,12 +51,12 @@ func (p *Protocol) RegisterMessage(message Messager, name string) {
 	if _, ok := p.Msgs[name]; ok {
 		_ = fmt.Errorf("message with %s already exists", name)
 	}
-	if _, ok := p.msgsFromHash[message.Hash()]; ok {
+	if _, ok := p.MsgsFromHash[message.Hash()]; ok {
 		_ = fmt.Errorf("message with %d already exists", message.Hash())
 	}
 	p.Msgs[name] = message
-	p.msgsFromHash[message.Hash()] = message
-	p.namesFromHash[message.Hash()] = name
+	p.MsgsFromHash[message.Hash()] = message
+	p.NamesFromHash[message.Hash()] = name
 	p.globalView.AddMessages([]Messager{message})
 }
 
@@ -78,9 +78,9 @@ func (p *Protocol) sendAndJustify(validator *Validator, messageName string) {
 	message := p.Msgs[messageName]
 	messageToSend := p.msgNeededJustify(message, validator)
 	//for _, msg := range messageToSend {
-	//	fmt.Println(p.namesFromHash[msg.Hash()])
+	//	fmt.Println(p.NamesFromHash[msg.Hash()])
 	//	for _, hash := range msg.Justification {
-	//		fmt.Println(p.namesFromHash[hash])
+	//		fmt.Println(p.NamesFromHash[hash])
 	//	}
 	//}
 	validator.ReceiveMessages(messageToSend)
@@ -94,7 +94,7 @@ func (p *Protocol) msgNeededJustify(message Messager, validator *Validator) []Me
 		nextHashes := hashset.New()
 		for _, m := range messageHashes.Values() {
 			messageHash := m.(uint64)
-			message = p.msgsFromHash[messageHash]
+			message = p.MsgsFromHash[messageHash]
 			messageNeeded.Add(message)
 			for _, hash := range message.Justification() {
 				if _, ok := validator.View().JustifiedMsg()[hash]; !ok {

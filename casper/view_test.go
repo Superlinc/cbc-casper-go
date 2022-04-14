@@ -31,7 +31,7 @@ func TestView_ReceiveJustifiedMessage(t *testing.T) {
 	j := v1.Justification()
 	set := hashset.New()
 	for _, v := range j {
-		//fmt.Println(k.name, p.namesFromHash[v])
+		//fmt.Println(k.name, p.NamesFromHash[v])
 		set.Add(v)
 	}
 	if set.Contains(p.Msgs["A"]) {
@@ -45,7 +45,7 @@ func TestView_ReceiveJustifiedMessage(t *testing.T) {
 	}
 	p.Execute("SJ-1-B")
 	//for hash := range v1.globalView.pendingMsg {
-	//	fmt.Println(p.namesFromHash[hash])
+	//	fmt.Println(p.NamesFromHash[hash])
 	//}
 	j = v1.Justification()
 	if j[v0] != p.Msgs["B"].Hash() {
