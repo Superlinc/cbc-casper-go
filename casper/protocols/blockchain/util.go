@@ -10,7 +10,7 @@ func getProtocol(weights []uint64) *Protocol {
 		weights = []uint64{10, 9, 8, 7, 6}
 	}
 	estimates := make([]interface{}, len(weights))
-	str := simulation.GenerateBlockchainJsonString(weights, "", estimates)
+	str := simulation.GenerateBlockchainJsonString(weights, estimates)
 	p, err := NewProtocol(str, 1)
 	if err != nil {
 		_ = fmt.Errorf(err.Error())

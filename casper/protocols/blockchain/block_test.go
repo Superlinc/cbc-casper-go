@@ -2,7 +2,6 @@ package blockchain
 
 import (
 	"cbc-casper-go/casper"
-	"cbc-casper-go/casper/simulation"
 	"testing"
 )
 
@@ -64,12 +63,7 @@ func Test_isValidEstimate(t *testing.T) {
 }
 
 func TestBlock_isInBlockChain(t *testing.T) {
-	str := simulation.GenerateBlockchainJsonString([]uint64{10, 11}, "", []interface{}{nil, nil})
-	p, err := NewProtocol(str, 1)
-	if p == nil || err != nil {
-		t.Errorf("error")
-		return
-	}
+	p := getProtocol([]uint64{10, 11})
 	p.Execute("M-0-A SJ-1-A M-1-B SJ-0-B M-0-C SJ-1-C M-1-D SJ-0-D")
 	prev := p.Msgs["A"]
 	for _, b := range []string{"B", "C", "D"} {

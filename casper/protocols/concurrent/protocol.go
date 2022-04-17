@@ -4,7 +4,6 @@ import (
 	"cbc-casper-go/casper"
 	. "cbc-casper-go/casper/simulation"
 	"encoding/json"
-	"errors"
 	"github.com/emirpasic/gods/sets/hashset"
 	"math/rand"
 	"time"
@@ -44,7 +43,7 @@ func NewProtocol(jsonStr string, reportInterval uint64) (*Protocol, error) {
 	concurrentProtocol.createRules["random"] = createRandomOutputs
 	concurrentProtocol.createRules["all"] = createAllIncrementedOutputs
 	concurrentProtocol.initRewriteRule(parsedJson.Conf.SelectOutputs, parsedJson.Conf.CreateOutputs)
-	concurrentProtocol.SetInitMsg(parsedJson.Conf.Estimates, parsedJson.Conf.CreateOutputs)
+	concurrentProtocol.SetInitMsg(parsedJson.Conf.GenesisEstimate, parsedJson.Conf.CreateOutputs)
 	return concurrentProtocol, nil
 }
 
@@ -57,12 +56,12 @@ func (p *Protocol) initRewriteRule(selectName, createName string) {
 	p.GlobalView.(*View).setRewriteRules(selectOutputs, createOutputs)
 }
 
-func (p *Protocol) SetInitMsg(genenis interface{}, createName string) {
+func (p *Protocol) SetInitMsg(genesis []int, createName string) {
 	validator := p.ValSet.GetValByName(0)
 	blocks := make([]*Block, 0)
 	inputs := hashset.New()
-	for _, v := range genenis.([]float64) {
-		inputs.Add(int(v))
+	for _, v := range genesis {
+		inputs.Add(v)
 	}
 	outputs := p.createRules[createName](inputs, inputs.Size())
 	estimate := make(map[string]interface{})
@@ -122,15 +121,12 @@ func createAllIncrementedOutputs(oldOutputs *hashset.Set, num int) *hashset.Set 
 
 func parseJson(jsonStr string) (*JsonBase, error) {
 	// todo 改造为解析block
-	var parsedJson JsonBase
+	parsedJson := new(JsonBase)
 	err := json.Unmarshal([]byte(jsonStr), &parsedJson)
 	if err != nil {
 		return nil, err
 	}
-	if len(parsedJson.Conf.Estimates.([]interface{})) != len(parsedJson.Conf.Validators) {
-		return nil, errors.New("len(validators) != len(estimates)")
-	}
-	blocks := make([]*Block, len(parsedJson.Conf.Estimates.([]interface{})))
+	blocks := make([]*Block, len(parsedJson.Conf.Validators))
 	parsedJson.Conf.Estimates = blocks
-	return &parsedJson, nil
+	return parsedJson, nil
 }

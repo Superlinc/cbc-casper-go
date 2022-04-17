@@ -3,6 +3,7 @@ package simulation
 import (
 	"container/list"
 	"encoding/json"
+	"math/rand"
 )
 
 type JsonBase struct {
@@ -12,10 +13,12 @@ type JsonBase struct {
 }
 
 type Config struct {
-	Validators    []uint64    `json:"validators"`
-	Estimates     interface{} `json:"estimates"`
-	SelectOutputs string      `json:"select_outputs"`
-	CreateOutputs string      `json:"create_outputs"`
+	Validators      []uint64    `json:"validators"`
+	Estimates       interface{} `json:"estimates"`
+	SelectOutputs   string      `json:"select_outputs"`
+	CreateOutputs   string      `json:"create_outputs"`
+	StartOutputs    []int       `json:"start_outputs"`
+	GenesisEstimate []int       `json:"genesis_estimate"`
 }
 
 type Execution struct {
@@ -23,7 +26,7 @@ type Execution struct {
 	ExeStr      string `json:"exe_str"`
 }
 
-func makeBaseObj(protocol, exeStr string, weights []uint64, estimates []interface{}) *JsonBase {
+func makeBaseObj(protocol string, weights []uint64, estimates []interface{}) *JsonBase {
 	return &JsonBase{
 		Protocol: protocol,
 		Conf: Config{
@@ -32,13 +35,12 @@ func makeBaseObj(protocol, exeStr string, weights []uint64, estimates []interfac
 		},
 		Exec: Execution{
 			MsgPerRound: 1,
-			ExeStr:      exeStr,
 		},
 	}
 }
 
-func GenerateBinaryJsonString(weights []uint64, exeStr string, estimates []interface{}) string {
-	data := makeBaseObj("binary", exeStr, weights, estimates)
+func GenerateBinaryJsonString(weights []uint64, estimates []interface{}) string {
+	data := makeBaseObj("binary", weights, estimates)
 	var str string
 	if bs, err := json.Marshal(data); err == nil {
 		str = string(bs)
@@ -47,8 +49,8 @@ func GenerateBinaryJsonString(weights []uint64, exeStr string, estimates []inter
 	return str
 }
 
-func GenerateIntegerJsonString(weights []uint64, exeStr string, estimates []interface{}) string {
-	data := makeBaseObj("integer", exeStr, weights, estimates)
+func GenerateIntegerJsonString(weights []uint64, estimates []interface{}) string {
+	data := makeBaseObj("integer", weights, estimates)
 	var str string
 	if bs, err := json.Marshal(data); err == nil {
 		str = string(bs)
@@ -57,7 +59,7 @@ func GenerateIntegerJsonString(weights []uint64, exeStr string, estimates []inte
 	return str
 }
 
-func GenerateOrderJsonString(weights []uint64, exeStr string, estimates []interface{}) string {
+func GenerateOrderJsonString(weights []uint64, estimates []interface{}) string {
 	wrap := make([]interface{}, 0, len(estimates))
 	for _, estimate := range estimates {
 		l := estimate.(*list.List)
@@ -69,7 +71,7 @@ func GenerateOrderJsonString(weights []uint64, exeStr string, estimates []interf
 		}
 		wrap = append(wrap, tmp)
 	}
-	data := makeBaseObj("order", exeStr, weights, wrap)
+	data := makeBaseObj("order", weights, wrap)
 	var str string
 	if bs, err := json.Marshal(data); err == nil {
 		str = string(bs)
@@ -78,8 +80,33 @@ func GenerateOrderJsonString(weights []uint64, exeStr string, estimates []interf
 	return str
 }
 
-func GenerateBlockchainJsonString(weights []uint64, exeStr string, estimates []interface{}) string {
-	data := makeBaseObj("blockchain", exeStr, weights, estimates)
+func GenerateBlockchainJsonString(weights []uint64, estimates []interface{}) string {
+	data := makeBaseObj("blockchain", weights, estimates)
+	var str string
+	if bs, err := json.Marshal(data); err == nil {
+		str = string(bs)
+		// fmt.Println("generate successfully")
+	}
+	return str
+}
+
+func GenerateConcurrentJsonString(weights []uint64, outputs []int, genEst []int, selectName, createName string) string {
+	data := makeBaseObj("concurrent", weights, nil)
+	if outputs == nil {
+		outputs = make([]int, 0, 10)
+		for range [10]struct{}{} {
+			outputs = append(outputs, rand.Intn(100000))
+		}
+	}
+	data.Conf.StartOutputs = outputs
+	if genEst == nil {
+		for i := 0; i < len(outputs); i += 2 {
+			genEst = append(genEst, outputs[i])
+		}
+	}
+	data.Conf.GenesisEstimate = genEst
+	data.Conf.SelectOutputs = selectName
+	data.Conf.CreateOutputs = createName
 	var str string
 	if bs, err := json.Marshal(data); err == nil {
 		str = string(bs)

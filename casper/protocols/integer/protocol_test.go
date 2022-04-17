@@ -7,7 +7,7 @@ import (
 )
 
 func TestIntegerProtocol_SetInitMsg(t *testing.T) {
-	jsonString := simulation.GenerateIntegerJsonString([]uint64{1, 2, 3, 4, 5}, "", []interface{}{100, 50, 1, 0, 24})
+	jsonString := simulation.GenerateIntegerJsonString([]uint64{1, 2, 3, 4, 5}, []interface{}{100, 50, 1, 0, 24})
 	parsedJson, err := parseJson(jsonString)
 	if err != nil {
 		t.Errorf("error")

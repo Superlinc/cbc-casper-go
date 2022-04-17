@@ -3,7 +3,6 @@ package concurrent
 import (
 	"cbc-casper-go/casper"
 	"errors"
-	"github.com/emirpasic/gods/sets/hashset"
 )
 
 type Block struct {
@@ -51,7 +50,7 @@ func isValidEstimate(estimate interface{}) bool {
 			return false
 		}
 	}
-	if set, ok := m["blocks"].(*hashset.Set); !ok || set.Size() < 1 {
+	if blocks, ok := m["blocks"].([]*Block); !ok || len(blocks) < 1 {
 		return false
 	}
 	return true
