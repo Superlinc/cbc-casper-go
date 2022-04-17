@@ -10,7 +10,7 @@ func TestSaveInitialEstimates(t *testing.T) {
 	str := GenerateBinaryJsonString([]uint64{1, 2, 3, 4, 5}, "", []interface{}{1, 0, 1, 0, 1})
 	var binaryJson JsonBase
 	_ = json.Unmarshal([]byte(str), &binaryJson)
-	p, err := NewBinaryProtocol(str, 1)
+	p, err := NewProtocol(str, 1)
 	if err != nil {
 		t.Errorf("error")
 	} else {

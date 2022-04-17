@@ -12,8 +12,10 @@ type JsonBase struct {
 }
 
 type Config struct {
-	Validators []uint64    `json:"validators"`
-	Estimates  interface{} `json:"estimates,[]int"`
+	Validators    []uint64    `json:"validators"`
+	Estimates     interface{} `json:"estimates"`
+	SelectOutputs string      `json:"select_outputs"`
+	CreateOutputs string      `json:"create_outputs"`
 }
 
 type Execution struct {

@@ -56,6 +56,16 @@ func Max(set *hashset.Set) uint64 {
 	return max
 }
 
+func Intersection(a, b *hashset.Set) *hashset.Set {
+	result := hashset.New()
+	for _, value := range a.Values() {
+		if !b.Contains(value) {
+			result.Add(value)
+		}
+	}
+	return result
+}
+
 func StringListContain(strs []string, str string) bool {
 	for _, s := range strs {
 		if s == str {

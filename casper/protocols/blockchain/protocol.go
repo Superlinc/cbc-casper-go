@@ -11,7 +11,7 @@ type Protocol struct {
 	*casper.Protocol
 }
 
-func NewBlockchainProtocol(jsonStr string, reportInterval uint64) (*Protocol, error) {
+func NewProtocol(jsonStr string, reportInterval uint64) (*Protocol, error) {
 	parsedJson, err := parseJson(jsonStr)
 	if parsedJson == nil || err != nil {
 		return nil, err

@@ -65,7 +65,7 @@ func Test_isValidEstimate(t *testing.T) {
 
 func TestBlock_isInBlockChain(t *testing.T) {
 	str := simulation.GenerateBlockchainJsonString([]uint64{10, 11}, "", []interface{}{nil, nil})
-	p, err := NewBlockchainProtocol(str, 1)
+	p, err := NewProtocol(str, 1)
 	if p == nil || err != nil {
 		t.Errorf("error")
 		return

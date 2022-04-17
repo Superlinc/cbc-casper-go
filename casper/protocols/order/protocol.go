@@ -12,7 +12,7 @@ type Protocol struct {
 	*casper.Protocol
 }
 
-func NewOrderProtocol(jsonStr string, reportInterval uint64) (*Protocol, error) {
+func NewProtocol(jsonStr string, reportInterval uint64) (*Protocol, error) {
 	parsedJson, err := parseJson(jsonStr)
 	if parsedJson == nil || err != nil {
 		return nil, err
