@@ -59,7 +59,7 @@ func Max(set *hashset.Set) uint64 {
 func Intersection(a, b *hashset.Set) *hashset.Set {
 	result := hashset.New()
 	for _, value := range a.Values() {
-		if !b.Contains(value) {
+		if b.Contains(value) {
 			result.Add(value)
 		}
 	}
