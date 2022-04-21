@@ -16,13 +16,13 @@ func getEstimate(latestMessage map[*casper.Validator]casper.Messager) int {
 	})
 	var half float64
 	for v, _ := range latestMessage {
-		half += float64(v.Weight())
+		half += v.Weight()
 	}
 	half /= 2.0
-	var prefixWeight uint64
+	var prefixWeight float64
 	for _, bet := range msgs {
 		prefixWeight += bet.Sender().Weight()
-		if float64(prefixWeight) >= half {
+		if prefixWeight >= half {
 			return bet.(*casper.Message).Estimate.(int)
 		}
 	}

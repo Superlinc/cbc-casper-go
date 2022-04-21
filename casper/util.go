@@ -14,6 +14,14 @@ func MaxUint(a, b uint64) uint64 {
 	}
 }
 
+func MaxFloat(a, b float64) float64 {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+
 func GetRandomStr(length uint64) string {
 	str := "abcdefghijklmnopqrstuvwxyz"
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -32,7 +40,7 @@ func IntSum(nums []int) int {
 	return sum
 }
 
-func UInt64Sum(nums []uint64) uint64 {
+func UInt64SliceSum(nums []uint64) uint64 {
 	var sum uint64
 	for _, num := range nums {
 		sum += num
@@ -40,7 +48,15 @@ func UInt64Sum(nums []uint64) uint64 {
 	return sum
 }
 
-func Sum(set *hashset.Set) uint64 {
+func Float64SliceSum(nums []float64) float64 {
+	var sum float64
+	for _, num := range nums {
+		sum += num
+	}
+	return sum
+}
+
+func UInt64SetSum(set *hashset.Set) uint64 {
 	var sum uint64
 	for _, v := range set.Values() {
 		sum += v.(uint64)
@@ -48,10 +64,18 @@ func Sum(set *hashset.Set) uint64 {
 	return sum
 }
 
-func Max(set *hashset.Set) uint64 {
-	var max uint64
+func Float64SetSum(set *hashset.Set) float64 {
+	var sum float64
 	for _, v := range set.Values() {
-		max = MaxUint(max, v.(uint64))
+		sum += v.(float64)
+	}
+	return sum
+}
+
+func Max(set *hashset.Set) float64 {
+	var max float64
+	for _, v := range set.Values() {
+		max = MaxFloat(max, v.(float64))
 	}
 	return max
 }

@@ -11,12 +11,12 @@ func init() {
 
 type Validator struct {
 	name   int
-	weight uint64
+	weight float64
 	valSet *ValidatorSet
 	view   Viewer
 }
 
-func (v *Validator) Weight() uint64 {
+func (v *Validator) Weight() float64 {
 	return v.weight
 }
 

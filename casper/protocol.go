@@ -21,7 +21,7 @@ type Protocol struct {
 	handlers         map[string]func(*Protocol, *Validator, string)
 }
 
-func NewProtocol(weights []uint64, view Viewer, views []Viewer, messagePerRound uint64) *Protocol {
+func NewProtocol(weights []float64, view Viewer, views []Viewer, messagePerRound uint64) *Protocol {
 	protocol := &Protocol{
 		ValSet:           NewValidatorSet(weights, views),
 		GlobalView:       view,

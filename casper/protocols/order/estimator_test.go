@@ -8,7 +8,7 @@ import (
 )
 
 func TestGetEstimate(t *testing.T) {
-	weights := []uint64{5}
+	weights := []float64{5}
 	latestEstimates := make(map[int]*list.List)
 	latestEstimates[0] = list.New()
 	latestEstimates[0].PushBack(1)
@@ -19,7 +19,7 @@ func TestGetEstimate(t *testing.T) {
 	estimate.PushBack(5)
 	estimate.PushBack(6)
 	testGetEstimate(weights, latestEstimates, estimate, t)
-	weights = []uint64{5, 6, 7}
+	weights = []float64{5, 6, 7}
 	latestEstimates = make(map[int]*list.List)
 	latestEstimates[0] = list.New()
 	latestEstimates[0].PushBack(1)
@@ -34,7 +34,7 @@ func TestGetEstimate(t *testing.T) {
 	estimate.PushBack(1)
 	estimate.PushBack(2)
 	testGetEstimate(weights, latestEstimates, estimate, t)
-	weights = []uint64{5, 6, 7}
+	weights = []float64{5, 6, 7}
 	latestEstimates = make(map[int]*list.List)
 	latestEstimates[0] = list.New()
 	latestEstimates[0].PushBack(1)
@@ -53,7 +53,7 @@ func TestGetEstimate(t *testing.T) {
 	estimate.PushBack(1)
 	estimate.PushBack(3)
 	testGetEstimate(weights, latestEstimates, estimate, t)
-	weights = []uint64{5, 10, 14}
+	weights = []float64{5, 10, 14}
 	latestEstimates = make(map[int]*list.List)
 	latestEstimates[0] = list.New()
 	latestEstimates[0].PushBack("fish")
@@ -76,7 +76,7 @@ func TestGetEstimate(t *testing.T) {
 	estimate.PushBack("dog")
 	estimate.PushBack("fish")
 	testGetEstimate(weights, latestEstimates, estimate, t)
-	weights = []uint64{5, 6, 7, 8}
+	weights = []float64{5, 6, 7, 8}
 	latestEstimates = make(map[int]*list.List)
 	latestEstimates[0] = list.New()
 	latestEstimates[0].PushBack("fish")
@@ -102,7 +102,7 @@ func TestGetEstimate(t *testing.T) {
 
 }
 
-func testGetEstimate(weights []uint64, latestEstimates map[int]*list.List, target *list.List, t *testing.T) {
+func testGetEstimate(weights []float64, latestEstimates map[int]*list.List, target *list.List, t *testing.T) {
 	latestMsg := make(map[*casper.Validator]casper.Messager)
 	valSet := casper.NewValidatorSet(weights, nil)
 	for name, esti := range latestEstimates {

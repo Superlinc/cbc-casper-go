@@ -5,9 +5,9 @@ import (
 	"fmt"
 )
 
-func getProtocol(weights []uint64) *Protocol {
+func getProtocol(weights []float64) *Protocol {
 	if weights == nil {
-		weights = []uint64{10, 9, 8, 7, 6}
+		weights = []float64{10, 9, 8, 7, 6}
 	}
 	estimates := make([]interface{}, len(weights))
 	str := simulation.GenerateBlockchainJsonString(weights, estimates)

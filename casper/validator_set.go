@@ -9,7 +9,7 @@ type ValidatorSet struct {
 	validators *hashset.Set
 }
 
-func NewValidatorSet(weights []uint64, views []Viewer) *ValidatorSet {
+func NewValidatorSet(weights []float64, views []Viewer) *ValidatorSet {
 	validatorSet := &ValidatorSet{validators: hashset.New()}
 	if views == nil {
 		views = make([]Viewer, 0, len(weights))
@@ -28,8 +28,8 @@ func NewValidatorSet(weights []uint64, views []Viewer) *ValidatorSet {
 	return validatorSet
 }
 
-func (valSet *ValidatorSet) Weight(validators []*Validator) uint64 {
-	var sum uint64
+func (valSet *ValidatorSet) Weight(validators []*Validator) float64 {
+	var sum float64
 	if validators == nil {
 		validators = make([]*Validator, 0, valSet.Size())
 		for _, v := range valSet.validators.Values() {
@@ -104,8 +104,8 @@ func (valSet ValidatorSet) Names() []int {
 	return names
 }
 
-func (valSet ValidatorSet) Weights() []uint64 {
-	weights := make([]uint64, 0, valSet.validators.Size())
+func (valSet ValidatorSet) Weights() []float64 {
+	weights := make([]float64, 0, valSet.validators.Size())
 	for _, v := range valSet.validators.Values() {
 		validator := v.(*Validator)
 		weights = append(weights, validator.Weight())

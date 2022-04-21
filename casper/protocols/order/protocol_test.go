@@ -18,7 +18,7 @@ func TestOrderProtocol_SetInitMsg(t *testing.T) {
 	l4.PushBack(44)
 	l5 := list.New()
 	l5.PushBack(66)
-	jsonString := simulation.GenerateOrderJsonString([]uint64{1, 2, 3, 4, 5}, []interface{}{l1, l2, l3, l4, l5})
+	jsonString := simulation.GenerateOrderJsonString([]float64{1, 2, 3, 4, 5}, []interface{}{l1, l2, l3, l4, l5})
 	parsedJson, err := parseJson(jsonString)
 	if err != nil {
 		t.Errorf("error: %s", err)

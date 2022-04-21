@@ -7,7 +7,7 @@ import (
 	"github.com/emirpasic/gods/sets/hashset"
 )
 
-// CliqueOracle todo
+// CliqueOracle 安全预言机
 type CliqueOracle struct {
 	candidateEstimate protocols.Bet
 	View              *View
@@ -79,14 +79,14 @@ func (o *CliqueOracle) collectEdge() [][]interface{} {
 // 1. 他们的最新消息都满足候选消息
 // 2. 他们互相看过最新消息
 // 3. 他们当中没有不满足候选消息的最新消息
-func (o *CliqueOracle) findBiggestClique() ([]*Validator, uint64) {
+func (o *CliqueOracle) findBiggestClique() ([]*Validator, float64) {
 	if o.ValSet.Weight(o.candidates) < o.ValSet.Weight(nil)/2 {
 		return nil, 0
 	}
 	edges := o.collectEdge()
 	g := NewGraph(edges...)
 	cliques := g.FindMaximalClique()
-	var maxWeight uint64
+	var maxWeight float64
 	var maxClique []*Validator
 	for _, clique := range cliques {
 		weight := GetWeight(clique...)
@@ -98,8 +98,8 @@ func (o *CliqueOracle) findBiggestClique() ([]*Validator, uint64) {
 	return maxClique, maxWeight
 }
 
-// CheckEstimateSafety todo
-func (o *CliqueOracle) CheckEstimateSafety() (uint64, int) {
+// CheckEstimateSafety 返回错误容忍度和不诚实的节点数
+func (o *CliqueOracle) CheckEstimateSafety() (float64, int) {
 	biggestClique, cliqueWeight := o.findBiggestClique()
 	faultTolerance := 2*cliqueWeight - o.ValSet.Weight(nil)
 
@@ -114,7 +114,7 @@ func (o *CliqueOracle) CheckEstimateSafety() (uint64, int) {
 		weights.Add(validator.Weight())
 		diff.Add(validator.Weight())
 	}
-	for Sum(equivocating) < faultTolerance {
+	for Float64SetSum(equivocating) < faultTolerance {
 		equivocating.Add(Max(diff))
 		diff.Remove(Max(diff))
 	}

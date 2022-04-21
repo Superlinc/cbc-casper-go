@@ -7,13 +7,13 @@ import (
 )
 
 func getEstimate(latestMessage map[*casper.Validator]casper.Messager) *list.List {
-	weights := make(map[interface{}]uint64)
+	weights := make(map[interface{}]float64)
 
 	for validator, m := range latestMessage {
 		message := m.(*casper.Message)
 		estimate := message.Estimate.(*list.List)
 		for i, iter := 0, estimate.Front(); iter != nil; i, iter = i+1, iter.Next() {
-			weights[iter.Value] += validator.Weight() * uint64(estimate.Len()-i)
+			weights[iter.Value] += validator.Weight() * float64(estimate.Len()-i)
 		}
 	}
 

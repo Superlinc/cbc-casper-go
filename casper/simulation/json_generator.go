@@ -13,7 +13,7 @@ type JsonBase struct {
 }
 
 type Config struct {
-	Validators      []uint64    `json:"validators"`
+	Validators      []float64   `json:"validators"`
 	Estimates       interface{} `json:"estimates"`
 	SelectOutputs   string      `json:"select_outputs"`
 	CreateOutputs   string      `json:"create_outputs"`
@@ -26,7 +26,7 @@ type Execution struct {
 	ExeStr      string `json:"exe_str"`
 }
 
-func makeBaseObj(protocol string, weights []uint64, estimates []interface{}) *JsonBase {
+func makeBaseObj(protocol string, weights []float64, estimates []interface{}) *JsonBase {
 	return &JsonBase{
 		Protocol: protocol,
 		Conf: Config{
@@ -39,7 +39,7 @@ func makeBaseObj(protocol string, weights []uint64, estimates []interface{}) *Js
 	}
 }
 
-func GenerateBinaryJsonString(weights []uint64, estimates []interface{}) string {
+func GenerateBinaryJsonString(weights []float64, estimates []interface{}) string {
 	data := makeBaseObj("binary", weights, estimates)
 	var str string
 	if bs, err := json.Marshal(data); err == nil {
@@ -49,7 +49,7 @@ func GenerateBinaryJsonString(weights []uint64, estimates []interface{}) string 
 	return str
 }
 
-func GenerateIntegerJsonString(weights []uint64, estimates []interface{}) string {
+func GenerateIntegerJsonString(weights []float64, estimates []interface{}) string {
 	data := makeBaseObj("integer", weights, estimates)
 	var str string
 	if bs, err := json.Marshal(data); err == nil {
@@ -59,7 +59,7 @@ func GenerateIntegerJsonString(weights []uint64, estimates []interface{}) string
 	return str
 }
 
-func GenerateOrderJsonString(weights []uint64, estimates []interface{}) string {
+func GenerateOrderJsonString(weights []float64, estimates []interface{}) string {
 	wrap := make([]interface{}, 0, len(estimates))
 	for _, estimate := range estimates {
 		l := estimate.(*list.List)
@@ -80,7 +80,7 @@ func GenerateOrderJsonString(weights []uint64, estimates []interface{}) string {
 	return str
 }
 
-func GenerateBlockchainJsonString(weights []uint64, estimates []interface{}) string {
+func GenerateBlockchainJsonString(weights []float64, estimates []interface{}) string {
 	data := makeBaseObj("blockchain", weights, estimates)
 	var str string
 	if bs, err := json.Marshal(data); err == nil {
@@ -90,7 +90,7 @@ func GenerateBlockchainJsonString(weights []uint64, estimates []interface{}) str
 	return str
 }
 
-func GenerateConcurrentJsonString(weights []uint64, outputs []int, genEst []int, selectName, createName string) string {
+func GenerateConcurrentJsonString(weights []float64, outputs []int, genEst []int, selectName, createName string) string {
 	data := makeBaseObj("concurrent", weights, nil)
 	if outputs == nil {
 		outputs = make([]int, 0, 10)

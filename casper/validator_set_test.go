@@ -5,7 +5,7 @@ import (
 )
 
 func TestNewValidatorSet(t *testing.T) {
-	weights := []uint64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	weights := []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	vs := NewValidatorSet(weights, nil)
 	valSet := vs
 	if valSet.validators.Size() != len(weights) {
@@ -14,15 +14,15 @@ func TestNewValidatorSet(t *testing.T) {
 }
 
 func TestValidatorSet_Weight(t *testing.T) {
-	weights := []uint64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	weights := []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	vs := NewValidatorSet(weights, nil)
-	if vs.Weight(vs.Validators()) != UInt64Sum(weights) {
+	if vs.Weight(vs.Validators()) != Float64SliceSum(weights) {
 		t.Errorf("error")
 	}
 }
 
 func TestValidatorSet_GetValByName(t *testing.T) {
-	weights := []uint64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	weights := []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	vs := NewValidatorSet(weights, nil)
 	for _, validator := range vs.Validators() {
 		if validator != vs.GetValByName(validator.Name()) {
