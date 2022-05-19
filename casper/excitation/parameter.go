@@ -4,6 +4,7 @@ import "sort"
 
 const threshold = 1.0 / 3
 
+// Gini 计算基尼系数
 func Gini(validators []Validator) float64 {
 	totalWeight := TotalWeight(validators)
 	weights := make([]float64, len(validators))
