@@ -31,7 +31,7 @@ func (v *View) Estimate() interface{} {
 	return 0
 }
 
-func (v *View) UpdateSafeEstimates(valSet *ValidatorSet) {
+func (v *View) UpdateSafeEstimates(valSet *ValidatorSet) Messager {
 	panic("implement me")
 }
 

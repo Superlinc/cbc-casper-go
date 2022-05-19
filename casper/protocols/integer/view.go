@@ -22,7 +22,7 @@ func (v *View) Estimate() interface{} {
 	return getEstimate(v.LatestMsg())
 }
 
-func (v *View) UpdateSafeEstimates(valSet *casper.ValidatorSet) {
+func (v *View) UpdateSafeEstimates(valSet *casper.ValidatorSet) casper.Messager {
 	for _, m := range v.LatestMsg() {
 		message := m.(*casper.Message)
 		bet := &Bet{message}
@@ -42,4 +42,5 @@ func (v *View) UpdateSafeEstimates(valSet *casper.ValidatorSet) {
 			break
 		}
 	}
+	return v.lastFinalEstimate
 }

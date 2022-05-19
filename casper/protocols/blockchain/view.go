@@ -26,7 +26,7 @@ func (v *View) Estimate() interface{} {
 	return getForkChoice(v.lastFinBlk, v.children, v.LatestMsg())
 }
 
-func (v *View) UpdateSafeEstimates(valset *casper.ValidatorSet) {
+func (v *View) UpdateSafeEstimates(valset *casper.ValidatorSet) casper.Messager {
 	tip := v.Estimate().(*Block)
 	for tip != nil && tip != v.lastFinBlk {
 		oracle, err := safety_oracles.NewCliqueOracle(tip, v.View, valset)
@@ -37,9 +37,11 @@ func (v *View) UpdateSafeEstimates(valset *casper.ValidatorSet) {
 		faultTolerance, _ := oracle.CheckEstimateSafety()
 		if faultTolerance > 0 {
 			v.lastFinBlk = tip
+			break
 		}
 		tip = tip.Estimate.(*Block)
 	}
+	return v.lastFinBlk
 }
 
 func (v *View) updateProtocolSpecificView(block *Block) {

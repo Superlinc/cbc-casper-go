@@ -12,13 +12,13 @@ func TestEqualWeights(t *testing.T) {
 	tests := []struct {
 		name        string
 		args        args
-		wantWeights []float64
+		wantWeights []Validator
 	}{
-		{"1", args{length: 5}, []float64{1, 1, 1, 1, 1}},
+		{"1", args{length: 3}, []Validator{&NormalValidator{weight: 1}, &NormalValidator{weight: 1}, &NormalValidator{weight: 1}}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if gotWeights := EqualWeights(tt.args.length); !reflect.DeepEqual(gotWeights, tt.wantWeights) {
+			if gotWeights := EqualWeights(tt.args.length, false); !reflect.DeepEqual(gotWeights, tt.wantWeights) {
 				t.Errorf("EqualWeights() = %v, want %v", gotWeights, tt.wantWeights)
 			}
 		})
@@ -37,10 +37,10 @@ func TestRandomWeights(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotWeights := RandomWeights(tt.args.length)
-			for _, weight := range gotWeights {
-				if 0 > weight || weight >= 10 {
-					t.Errorf("weight: %f out of limit", weight)
+			gotWeights := RandomWeights(tt.args.length, false)
+			for _, validator := range gotWeights {
+				if 0 >= validator.Weight() || validator.Weight() > 10 {
+					t.Errorf("weight: %d out of limit", validator.Weight())
 				}
 			}
 		})

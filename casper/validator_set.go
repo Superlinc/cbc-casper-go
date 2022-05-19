@@ -122,6 +122,6 @@ func (valSet *ValidatorSet) Validators() []*Validator {
 	return validators
 }
 
-func (valSet *ValidatorSet) Size() uint64 {
-	return valSet.Size()
+func (valSet *ValidatorSet) Size() int {
+	return valSet.validators.Size()
 }

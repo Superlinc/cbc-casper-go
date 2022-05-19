@@ -1,33 +1,33 @@
 package excitation
 
 // GetRateSlice 生成weights切片的比例的前缀和的切片
-func GetRateSlice(weights []float64) []float64 {
-	sum := Sum(weights)
-	rates := make([]float64, len(weights))
-	for i, weight := range weights {
+func GetRateSlice(validators []Validator) []float64 {
+	sum := TotalWeight(validators)
+	rates := make([]float64, len(validators))
+	for i, validator := range validators {
 		if i == 0 {
-			rates[0] = weight / sum
+			rates[0] = float64(validator.Weight()) / sum
 		} else {
-			rates[i] = rates[i-1] + weight/sum
+			rates[i] = rates[i-1] + float64(validator.Weight())/sum
 		}
 
 	}
 	return rates
 }
 
-func GetRateSliceWithLimit(weights []float64) []float64 {
-	sum := Sum(weights)
-	limitedWights := make([]float64, len(weights))
-	limit := sum * 0.01
-	for i, weight := range weights {
-		if weight > limit {
+func GetRateSliceWithLimit(validators []Validator) []float64 {
+	sum := TotalWeight(validators)
+	limitedWights := make([]float64, len(validators))
+	limit := sum * 0.005
+	for i, validator := range validators {
+		if float64(validator.Weight()) > limit {
 			limitedWights[i] = limit
 		} else {
-			limitedWights[i] = weight
+			limitedWights[i] = float64(validator.Weight())
 		}
 	}
 	limitedSum := Sum(limitedWights)
-	rates := make([]float64, len(weights))
+	rates := make([]float64, len(validators))
 	for i, weight := range limitedWights {
 		if i == 0 {
 			rates[0] = weight / limitedSum

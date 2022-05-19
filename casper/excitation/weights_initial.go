@@ -10,19 +10,19 @@ func init() {
 }
 
 // EqualWeights 返回长度为length, 权重都为1的切片
-func EqualWeights(length int) (weights []float64) {
-	weights = make([]float64, length)
-	for i := range weights {
-		weights[i] = 1
+func EqualWeights(length int, age bool) []Validator {
+	validators := make([]Validator, length)
+	for i := 0; i < length; i++ {
+		validators[i] = NewValidator(age).GetCoin(1)
 	}
-	return
+	return validators
 }
 
 // RandomWeights 返回长度为length, 权重随机分布于[0,10)的切片
-func RandomWeights(length int) (weights []float64) {
-	weights = make([]float64, length)
-	for i := range weights {
-		weights[i] = rand.Float64() * 10
+func RandomWeights(length int, age bool) []Validator {
+	validators := make([]Validator, length)
+	for i := 0; i < length; i++ {
+		validators[i] = NewValidator(age).GetCoin(rand.Intn(10) + 1)
 	}
-	return
+	return validators
 }

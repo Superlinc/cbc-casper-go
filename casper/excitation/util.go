@@ -12,16 +12,26 @@ func Sum(arr []float64) float64 {
 }
 
 // RateOfWeightMoreThanThreshold 返回切片中多大比例的总和超过阈值
-func RateOfWeightMoreThanThreshold(weights []float64, threshold float64) (length int, rate float64) {
-	sum := Sum(weights)
-	sort.Sort(sort.Reverse(sort.Float64Slice(weights)))
+func RateOfWeightMoreThanThreshold(validators []Validator, threshold float64) (length int, rate float64) {
+	sum := TotalWeight(validators)
+	sort.SliceStable(validators, func(i, j int) bool {
+		return validators[i].Weight() > validators[j].Weight()
+	})
 	var prefix float64
-	for i, weight := range weights {
-		prefix += weight
+	for i, validator := range validators {
+		prefix += float64(validator.Weight())
 		if prefix/sum > threshold {
-			rate = float64(i+1) / float64(len(weights))
+			rate = float64(i+1) / float64(len(validators))
 			return i + 1, rate
 		}
 	}
 	return
+}
+
+func TotalWeight(validators []Validator) float64 {
+	weight := 0.0
+	for _, validator := range validators {
+		weight += float64(validator.Weight())
+	}
+	return weight
 }

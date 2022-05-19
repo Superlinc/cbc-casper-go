@@ -62,7 +62,7 @@ func parseJson(jsonStr string) (*JsonBase, error) {
 
 func (p *Protocol) SetInitMsg() {
 	genesis := NewBlock(nil, make(map[*casper.Validator]uint64), p.ValSet.GetValByName(0), 0, 0)
-	p.RegisterMessage(genesis, casper.GetRandomStr(10))
+	p.RegisterMessage(genesis, "genesis")
 	for _, validator := range p.ValSet.Validators() {
 		validator.InitializeView(NewView(), []casper.Messager{genesis})
 	}
