@@ -15,13 +15,15 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+type GetPara func([]Validator) float64
+
 func main() {
 	SaveCSV()
 }
 
-func simulation(lenVal, generation, interval int) []float64 {
+func simulation(lenVal, generation, interval int, f GetPara) []float64 {
 	UpdateGeneration(0)
-	validators := EqualWeights(lenVal, true)
+	validators := EqualWeights(lenVal, false)
 	curve := make([]float64, 0, generation/interval)
 	award := 1.0
 	inflationRate := 1.0
@@ -38,7 +40,7 @@ func simulation(lenVal, generation, interval int) []float64 {
 		//fmt.Println(rate, index)
 		validators[index].GetCoin(int(award))
 		if i%interval == 0 {
-			_, rate := RateOfWeightMoreThanThreshold(validators, 1.0/3)
+			rate := f(validators)
 			curve = append(curve, rate)
 		}
 		if i%inflationInterval == 0 {
@@ -47,7 +49,7 @@ func simulation(lenVal, generation, interval int) []float64 {
 		if i%tradeInterval == 0 {
 			x := rand.Intn(lenVal)
 			y := rand.Intn(lenVal)
-			num := validators[x].Remove()
+			num := validators[x].Expand()
 			validators[y].GetCoin(num)
 		}
 	}
@@ -58,7 +60,7 @@ func calAvg() {
 	avg := 0.0
 	times := 50
 	for i := 0; i < times; i++ {
-		curve := simulation(1000, 10000, 100)
+		curve := simulation(1000, 10000, 100, RateOfWeightMoreThanThreshold)
 		avg += curve[len(curve)-1]
 		fmt.Println(i, curve[len(curve)-1])
 	}
@@ -67,9 +69,9 @@ func calAvg() {
 }
 
 func SaveCSV() {
-	curve := simulation(1000, 10000, 100)
+	curve := simulation(1000, 10000, 100, Gini)
 	fmt.Println(curve)
-	file, _ := os.Create("优化有币龄无交易.csv")
+	file, _ := os.Create("gini.csv")
 	defer file.Close()
 	interval := 100
 	writer := csv.NewWriter(file)

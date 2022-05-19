@@ -4,35 +4,6 @@ import (
 	"testing"
 )
 
-func TestRateOfWeightMoreThanThreshold(t *testing.T) {
-	type args struct {
-		validators []Validator
-		threshold  float64
-	}
-	tests := []struct {
-		name       string
-		args       args
-		wantLength int
-		wantRate   float64
-	}{
-		{"1", args{
-			validators: []Validator{&NormalValidator{1}, &NormalValidator{1}, &NormalValidator{3}, &NormalValidator{5}},
-			threshold:  2.0 / 3,
-		}, 2, 0.5},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			gotLength, gotRate := RateOfWeightMoreThanThreshold(tt.args.validators, tt.args.threshold)
-			if gotLength != tt.wantLength {
-				t.Errorf("RateOfWeightMoreThanThreshold() gotLength = %v, want %v", gotLength, tt.wantLength)
-			}
-			if gotRate != tt.wantRate {
-				t.Errorf("RateOfWeightMoreThanThreshold() gotRate = %v, want %v", gotRate, tt.wantRate)
-			}
-		})
-	}
-}
-
 func TestSum(t *testing.T) {
 	type args struct {
 		arr []float64

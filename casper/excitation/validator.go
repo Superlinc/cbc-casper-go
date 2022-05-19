@@ -12,7 +12,7 @@ func init() {
 type Validator interface {
 	GetCoin(award int) Validator
 	Weight() int
-	Remove() int
+	Expand() int
 }
 
 var (
@@ -41,7 +41,7 @@ func (n *NormalValidator) Weight() int {
 	return n.weight
 }
 
-func (n *NormalValidator) Remove() int {
+func (n *NormalValidator) Expand() int {
 	num := rand.Intn(n.weight)
 	n.weight -= num
 	return num
@@ -68,7 +68,7 @@ func (a *AgeValidator) Weight() int {
 	return weight
 }
 
-func (a *AgeValidator) Remove() int {
+func (a *AgeValidator) Expand() int {
 	for gen, coin := range a.coins {
 		delete(a.coins, gen)
 		return coin
